@@ -1,0 +1,3444 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.2'
+      jupytext_version: 1.11.1
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+```{python}
+#this program reads in a csv file containing all Pnl
+
+import csv
+with open('\\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\PnLv2.csv', 'r') as file :
+  PnL = csv.reader(file)
+
+  AllsalesMMYY = {}
+  AllsaleMTH = {}
+  AllDirectCostofSalesMMYY = {}
+  AllDirectCostofSalesMTH = {}
+  AllProductionPayrollMMYY = {}
+  AllOtherMMYY = {}
+  AllTotalCostofSalesMMYY = {}
+  AllGrossMarginMMYY = {}
+  AllGrossMarginPctMMYY = {}
+  AllOperatingExpensesMMYY = {}
+  AllSalesandMarketingExpensesMMYY = {}
+  AllSalesandMarketingPayrollMMYY = {}
+  AllRentMMYY = {}
+  AllTravelMMYY = {}
+  AllBurglarAlarmMMYY = {}
+  AllTotalSalesAndMarketingExpensesMMYY = {}
+  AllSalesandMarketingPctMMYY = {}
+  AllGeneralandAdministrativeExpensesMMYY = {}
+  AllGeneralandAdministrativePayrollMMYY = {}
+  AllPayrollExpenseMMYY = {}
+  AllPayrollBurdenMMYY = {}
+  AllDepreciationMMYY = {}
+  AllOfficeSuppliesMMYY = {}
+  AllUtilitiesMMYY = {}
+  AllInsuranceMMYY = {}
+  AllTelephoneMMYY = {}
+  AllTotalGeneralandAdministrativeExpensesMMYY = {}
+  AllGeneralandAdministrativePctMMYY = {}
+  AllOtherExpensesMMYY = {}
+  AllOtherPayrollMMYY = {}
+  AllAdvertisingMMYY = {}
+  AllLoanRepaymentMMYY = {}
+  AllInventoryMMYY = {}
+  AllAccountingorlegalMMYY = {}
+  AllTotalOtherExpensesMMYY = {}
+  AllOtherPctMMYY = {}
+  AllTotalOperatingExpensesMMYY = {}
+  AllProfitBeforeInterestandTaxesMMYY = {}
+  AllInterestExpenseShort_termMMYY = {}
+  AllInterestExpenseLong_termMMYY = {}
+  AllTaxesIncurredMMYY = {}
+  AllExtraordinaryItemsMMYY = {}
+  AllNetProfitMMYY = {}
+  AllNetProfittoSalesMMYY = {}  
+    
+ 
+  AllProductionPayrollMTH = {}
+  AllOtherMTH = {}
+  AllTotalCostofSalesMTH = {}
+  AllGrossMarginMTH = {}
+  AllGrossMarginPctMTH = {}
+  AllOperatingExpensesMTH = {}
+  AllSalesandMarketingExpensesMTH = {}
+  AllSalesandMarketingPayrollMTH = {}
+  AllRentMTH = {}
+  AllTravelMTH = {}
+  AllBurglarAlarmMTH = {}
+  AllTotalSalesAndMarketingExpensesMTH = {}
+  AllSalesandMarketingPctMTH = {}
+  AllGeneralandAdministrativeExpensesMTH = {}
+  AllGeneralandAdministrativePayrollMTH = {}
+  AllPayrollExpenseMTH = {}
+  AllPayrollBurdenMTH = {}
+  AllDepreciationMTH = {}
+  AllOfficeSuppliesMTH = {}
+  AllUtilitiesMTH = {}
+  AllInsuranceMTH = {}
+  AllTelephoneMTH = {}
+  AllTotalGeneralandAdministrativeExpensesMTH = {}
+  AllGeneralandAdministrativePctMTH = {}
+  AllOtherExpensesMTH = {}
+  AllOtherPayrollMTH = {}
+  AllAdvertisingMTH = {}
+  AllLoanRepaymentMTH = {}
+  AllInventoryMTH = {}
+  AllAccountingorlegalMTH = {}
+  AllTotalOtherExpensesMTH = {}
+  AllOtherPctMTH = {}
+  AllTotalOperatingExpensesMTH = {}
+  AllProfitBeforeInterestandTaxesMTH = {}
+  AllInterestExpenseShort_termMTH = {}
+  AllInterestExpenseLong_termMTH = {}
+  AllTaxesIncurredMTH = {}
+  AllExtraordinaryItemsMTH = {}
+  AllNetProfitMTH = {}
+  AllNetProfittoSalesMTH = {}    
+  
+  CompanyTimeSliceMMYY = []
+  CompanyTimeSliceMTH = []
+  CompanyMMYY = ()
+  CompanyMTH = ()
+  company = []
+  num_companies = 2
+  coordinate = []
+
+  first_rowMTH= []
+  SalesMMYY = {}
+  SalesMTH = {}
+  DirectCostofSalesMMYY = {}
+  DirectCostofSalesMTH = {}   
+  num_lines = 42
+  for i, row in enumerate(PnL) :
+    if i == 0 :
+        first_rowMMYY = row[1:]
+        for j in range (len(row)-1) :
+           first_rowMTH.append(len(row) - j - 2 )
+           
+        for company in range (num_companies) :
+           for month in first_rowMMYY :
+              coordinate = (company, month)   
+              CompanyTimeSliceMMYY.append(coordinate)
+        CompanyMMYY = tuple(CompanyTimeSliceMMYY)    
+
+        for company in range (num_companies) :
+           for month in first_rowMTH :
+              coordinate = (company, month)   
+              CompanyTimeSliceMTH.append(coordinate)
+        CompanyMTH = tuple(CompanyTimeSliceMTH)  
+        
+       
+        AllSalesMMYY = dict.fromkeys(CompanyMMYY)
+        AllSalesMTH = dict.fromkeys(CompanyMTH)
+        DirectCostofSalesMMYY = dict.fromkeys(CompanyMMYY)
+        DirectCostofSalesMTH = dict.fromkeys(CompanyMTH)
+        
+        ProductionPayrollMMYY = dict.fromkeys(CompanyMMYY)
+        OtherMMYY = dict.fromkeys(CompanyMMYY)
+        TotalCostofSalesMMYY = dict.fromkeys(CompanyMMYY)
+        GrossMarginMMYY = dict.fromkeys(CompanyMMYY)
+        GrossMarginPctMMYY = dict.fromkeys(CompanyMMYY)
+        OperatingExpensesMMYY = dict.fromkeys(CompanyMMYY)
+        SalesandMarketingExpensesMMYY = dict.fromkeys(CompanyMMYY)
+        SalesandMarketingPayrollMMYY = dict.fromkeys(CompanyMMYY)
+        RentMMYY = dict.fromkeys(CompanyMMYY)
+        TravelMMYY = dict.fromkeys(CompanyMMYY)
+        BurglarAlarmMMYY = dict.fromkeys(CompanyMMYY)
+        TotalSalesAndMarketingExpensesMMYY = dict.fromkeys(CompanyMMYY)
+        SalesandMarketingPctMMYY = dict.fromkeys(CompanyMMYY)
+        GeneralandAdministrativeExpensesMMYY = dict.fromkeys(CompanyMMYY)
+        GeneralandAdministrativePayrollMMYY = dict.fromkeys(CompanyMMYY)
+        PayrollExpenseMMYY = dict.fromkeys(CompanyMMYY)
+        PayrollBurdenMMYY = dict.fromkeys(CompanyMMYY)
+        DepreciationMMYY = dict.fromkeys(CompanyMMYY)
+        OfficeSuppliesMMYY = dict.fromkeys(CompanyMMYY)
+        UtilitiesMMYY = dict.fromkeys(CompanyMMYY)
+        InsuranceMMYY = dict.fromkeys(CompanyMMYY)
+        TelephoneMMYY = dict.fromkeys(CompanyMMYY)
+        TotalGeneralandAdministrativeExpensesMMYY = dict.fromkeys(CompanyMMYY)
+        GeneralandAdministrativePctMMYY = dict.fromkeys(CompanyMMYY)
+        OtherExpensesMMYY = dict.fromkeys(CompanyMMYY)
+        OtherPayrollMMYY = dict.fromkeys(CompanyMMYY)
+        AdvertisingMMYY = dict.fromkeys(CompanyMMYY)
+        LoanRepaymentMMYY = dict.fromkeys(CompanyMMYY)
+        InventoryMMYY = dict.fromkeys(CompanyMMYY)
+        AccountingorlegalMMYY = dict.fromkeys(CompanyMMYY)
+        TotalOtherExpensesMMYY = dict.fromkeys(CompanyMMYY)
+        OtherPctMMYY = dict.fromkeys(CompanyMMYY)
+        TotalOperatingExpensesMMYY = dict.fromkeys(CompanyMMYY)
+        ProfitBeforeInterestandTaxesMMYY = dict.fromkeys(CompanyMMYY)
+        InterestExpenseShort_termMMYY = dict.fromkeys(CompanyMMYY)
+        InterestExpenseLong_termMMYY = dict.fromkeys(CompanyMMYY)
+        TaxesIncurredMMYY = dict.fromkeys(CompanyMMYY)
+        ExtraordinaryItemsMMYY = dict.fromkeys(CompanyMMYY)
+        NetProfitMMYY = dict.fromkeys(CompanyMMYY)
+        NetProfittoSalesMMYY = dict.fromkeys(CompanyMMYY)  
+        
+        ProductionPayrollMTH = dict.fromkeys(CompanyMTH)
+        OtherMTH = dict.fromkeys(CompanyMTH)
+        TotalCostofSalesMTH = dict.fromkeys(CompanyMTH)
+        GrossMarginMTH = dict.fromkeys(CompanyMTH)
+        GrossMarginPctMTH = dict.fromkeys(CompanyMTH)
+        OperatingExpensesMTH = dict.fromkeys(CompanyMTH)
+        SalesandMarketingExpensesMTH = dict.fromkeys(CompanyMTH)
+        SalesandMarketingPayrollMTH = dict.fromkeys(CompanyMTH)
+        RentMTH = dict.fromkeys(CompanyMTH)
+        TravelMTH = dict.fromkeys(CompanyMTH)
+        BurglarAlarmMTH = dict.fromkeys(CompanyMTH)
+        TotalSalesAndMarketingExpensesMTH = dict.fromkeys(CompanyMTH)
+        SalesandMarketingPctMTH = dict.fromkeys(CompanyMTH)
+        GeneralandAdministrativeExpensesMTH = dict.fromkeys(CompanyMTH)
+        GeneralandAdministrativePayrollMTH = dict.fromkeys(CompanyMTH)
+        PayrollExpenseMTH = dict.fromkeys(CompanyMTH)
+        PayrollBurdenMTH = dict.fromkeys(CompanyMTH)
+        DepreciationMTH = dict.fromkeys(CompanyMTH)
+        OfficeSuppliesMTH = dict.fromkeys(CompanyMTH)
+        UtilitiesMTH = dict.fromkeys(CompanyMTH)
+        InsuranceMTH = dict.fromkeys(CompanyMTH)
+        TelephoneMTH = dict.fromkeys(CompanyMTH)
+        TotalGeneralandAdministrativeExpensesMTH = dict.fromkeys(CompanyMTH)
+        GeneralandAdministrativePctMTH = dict.fromkeys(CompanyMTH)
+        OtherExpensesMTH = dict.fromkeys(CompanyMTH)
+        OtherPayrollMTH = dict.fromkeys(CompanyMTH)
+        AdvertisingMTH = dict.fromkeys(CompanyMTH)
+        LoanRepaymentMTH = dict.fromkeys(CompanyMTH)
+        InventoryMTH = dict.fromkeys(CompanyMTH)
+        AccountingorlegalMTH = dict.fromkeys(CompanyMTH)
+        TotalOtherExpensesMTH = dict.fromkeys(CompanyMTH)
+        OtherPctMTH = dict.fromkeys(CompanyMTH)
+        TotalOperatingExpensesMTH = dict.fromkeys(CompanyMTH)
+        ProfitBeforeInterestandTaxesMTH = dict.fromkeys(CompanyMTH)
+        InterestExpenseShort_termMTH = dict.fromkeys(CompanyMTH)
+        InterestExpenseLong_termMTH = dict.fromkeys(CompanyMTH)
+        TaxesIncurredMTH = dict.fromkeys(CompanyMTH)
+        ExtraordinaryItemsMTH = dict.fromkeys(CompanyMTH)
+        NetProfitMTH = dict.fromkeys(CompanyMTH)
+        NetProfittoSalesMTH = dict.fromkeys(CompanyMTH)    
+        
+        
+        
+        
+    elif (i-1) % num_lines == 0 :
+        company = (i-1) // num_lines 
+        SalesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        SalesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllSalesMMYY.update(SalesMMYY)
+        AllSalesMTH.update(SalesMTH)
+    elif (i-1) % num_lines == 1 : 
+        company = (i-1) // num_lines 
+        DirectCostofSalesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        DirectCostofSalesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllDirectCostofSalesMMYY.update(DirectCostofSalesMMYY)
+        AllDirectCostofSalesMTH.update(DirectCostofSalesMTH)
+    elif (i-1) % num_lines == 2 : 
+        company = (i-1) // num_lines 
+        ProductionPayrollMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        ProductionPayrollMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllProductionPayrollMMYY.update(ProductionPayrollMMYY)
+        AllProductionPayrollMTH.update(ProductionPayrollMTH)
+    elif (i-1) % num_lines == 3 : 
+        company = (i-1) // num_lines 
+        OtherMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        OtherMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllOtherMMYY.update(OtherMMYY)
+        AllOtherMTH.update(OtherMTH)   
+    elif (i-1) % num_lines == 4 : 
+        company = (i-1) // num_lines 
+        TotalCostofSalesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TotalCostofSalesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTotalCostofSalesMMYY.update(TotalCostofSalesMMYY)
+        AllTotalCostofSalesMTH.update(TotalCostofSalesMTH)   
+    elif (i-1) % num_lines == 5 : 
+        company = (i-1) // num_lines 
+        GrossMarginMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        GrossMarginMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllGrossMarginMMYY.update(GrossMarginMMYY)
+        AllGrossMarginMTH.update(GrossMarginMTH)
+    elif (i-1) % num_lines == 6 : 
+        company = (i-1) // num_lines 
+        GrossMarginPctMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        GrossMarginPctMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllGrossMarginPctMMYY.update(GrossMarginPctMMYY)
+        AllGrossMarginPctMTH.update(GrossMarginPctMTH)   
+    elif (i-1) % num_lines == 7 : 
+        company = (i-1) // num_lines 
+        OperatingExpensesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        OperatingExpensesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllOperatingExpensesMMYY.update(OperatingExpensesMMYY)
+        AllOperatingExpensesMTH.update(OperatingExpensesMTH)   
+    elif (i-1) % num_lines == 8 : 
+        company = (i-1) // num_lines 
+        SalesandMarketingExpensesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        SalesandMarketingExpensesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllSalesandMarketingExpensesMMYY.update(SalesandMarketingExpensesMMYY)
+        AllSalesandMarketingExpensesMTH.update(SalesandMarketingExpensesMTH)   
+    elif (i-1) % num_lines == 9 : 
+        company = (i-1) // num_lines 
+        SalesandMarketingPayrollMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        SalesandMarketingPayrollMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllSalesandMarketingPayrollMMYY.update(SalesandMarketingPayrollMMYY)
+        AllSalesandMarketingPayrollMTH.update(SalesandMarketingPayrollMTH)   
+    elif (i-1) % num_lines == 10 : 
+        company = (i-1) // num_lines 
+        RentMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        RentMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllRentMMYY.update(RentMMYY)
+        AllRentMTH.update(RentMTH)   
+    elif (i-1) % num_lines == 11 : 
+        company = (i-1) // num_lines 
+        TravelMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TravelMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTravelMMYY.update(TravelMMYY)
+        AllTravelMTH.update(TravelMTH)   
+    elif (i-1) % num_lines == 12 : 
+        company = (i-1) // num_lines 
+        BurglarAlarmMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        BurglarAlarmMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllBurglarAlarmMMYY.update(BurglarAlarmMMYY)
+        AllBurglarAlarmMTH.update(BurglarAlarmMTH)   
+    elif (i-1) % num_lines == 13 : 
+        company = (i-1) // num_lines 
+        TotalSalesAndMarketingExpensesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TotalSalesAndMarketingExpensesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTotalSalesAndMarketingExpensesMMYY.update(TotalSalesAndMarketingExpensesMMYY)
+        AllTotalSalesAndMarketingExpensesMTH.update(TotalSalesAndMarketingExpensesMTH)   
+    elif (i-1) % num_lines == 14 : 
+        company = (i-1) // num_lines 
+        SalesandMarketingPctMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        SalesandMarketingPctMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllSalesandMarketingPctMMYY.update(SalesandMarketingPctMMYY)
+        AllSalesandMarketingPctMTH.update(SalesandMarketingPctMTH)
+    elif (i-1) % num_lines == 15 : 
+        company = (i-1) // num_lines 
+        GeneralandAdministrativeExpensesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        GeneralandAdministrativeExpensesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllGeneralandAdministrativeExpensesMMYY.update(GeneralandAdministrativeExpensesMMYY)
+        AllGeneralandAdministrativeExpensesMTH.update(GeneralandAdministrativeExpensesMTH)
+    elif (i-1) % num_lines == 16 : 
+        company = (i-1) // num_lines 
+        GeneralandAdministrativePayrollMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        GeneralandAdministrativePayrollMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllGeneralandAdministrativePayrollMMYY.update(GeneralandAdministrativePayrollMMYY)
+        AllGeneralandAdministrativePayrollMTH.update(GeneralandAdministrativePayrollMTH)
+    elif (i-1) % num_lines == 17 : 
+        company = (i-1) // num_lines 
+        PayrollExpenseMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        PayrollExpenseMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllPayrollExpenseMMYY.update(PayrollExpenseMMYY)
+        AllPayrollExpenseMTH.update(PayrollExpenseMTH)   
+    elif (i-1) % num_lines == 18 : 
+        company = (i-1) // num_lines 
+        PayrollBurdenMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        PayrollBurdenMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllPayrollBurdenMMYY.update(PayrollBurdenMMYY)
+        AllPayrollBurdenMTH.update(PayrollBurdenMTH)   
+    elif (i-1) % num_lines == 19 : 
+        company = (i-1) // num_lines 
+        DepreciationMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        DepreciationMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllDepreciationMMYY.update(DepreciationMMYY)
+        AllDepreciationMTH.update(DepreciationMTH)   
+    elif (i-1) % num_lines == 20 : 
+        company = (i-1) // num_lines 
+        OfficeSuppliesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        OfficeSuppliesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllOfficeSuppliesMMYY.update(OfficeSuppliesMMYY)
+        AllOfficeSuppliesMTH.update(OfficeSuppliesMTH)   
+    elif (i-1) % num_lines == 21 : 
+        company = (i-1) // num_lines 
+        UtilitiesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        UtilitiesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllUtilitiesMMYY.update(UtilitiesMMYY)
+        AllUtilitiesMTH.update(UtilitiesMTH)   
+    elif (i-1) % num_lines == 22 : 
+        company = (i-1) // num_lines 
+        InsuranceMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        InsuranceMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllInsuranceMMYY.update(InsuranceMMYY)
+        AllInsuranceMTH.update(InsuranceMTH)   
+    elif (i-1) % num_lines == 23 : 
+        company = (i-1) // num_lines 
+        TelephoneMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TelephoneMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTelephoneMMYY.update(TelephoneMMYY)
+        AllTelephoneMTH.update(TelephoneMTH)   
+    elif (i-1) % num_lines == 24 : 
+        company = (i-1) // num_lines 
+        TotalGeneralandAdministrativeExpensesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TotalGeneralandAdministrativeExpensesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTotalGeneralandAdministrativeExpensesMMYY.update(TotalGeneralandAdministrativeExpensesMMYY)
+        AllTotalGeneralandAdministrativeExpensesMTH.update(TotalGeneralandAdministrativeExpensesMTH)
+    elif (i-1) % num_lines == 25 : 
+        company = (i-1) // num_lines 
+        GeneralandAdministrativePctMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        GeneralandAdministrativePctMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllGeneralandAdministrativePctMMYY.update(GeneralandAdministrativePctMMYY)
+        AllGeneralandAdministrativePctMTH.update(GeneralandAdministrativePctMTH)
+    elif (i-1) % num_lines == 26 : 
+        company = (i-1) // num_lines 
+        OtherExpensesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        OtherExpensesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllOtherExpensesMMYY.update(OtherExpensesMMYY)
+        AllOtherExpensesMTH.update(OtherExpensesMTH)
+    elif (i-1) % num_lines == 27 : 
+        company = (i-1) // num_lines 
+        OtherPayrollMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        OtherPayrollMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllOtherPayrollMMYY.update(OtherPayrollMMYY)
+        AllOtherPayrollMTH.update(OtherPayrollMTH)   
+    elif (i-1) % num_lines == 28 : 
+        company = (i-1) // num_lines 
+        AdvertisingMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        AdvertisingMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllAdvertisingMMYY.update(AdvertisingMMYY)
+        AllAdvertisingMTH.update(AdvertisingMTH)   
+    elif (i-1) % num_lines == 29 : 
+        company = (i-1) // num_lines 
+        LoanRepaymentMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        LoanRepaymentMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllLoanRepaymentMMYY.update(LoanRepaymentMMYY)
+        AllLoanRepaymentMTH.update(LoanRepaymentMTH)   
+    elif (i-1) % num_lines == 30 : 
+        company = (i-1) // num_lines 
+        InventoryMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        InventoryMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllInventoryMMYY.update(InventoryMMYY)
+        AllInventoryMTH.update(InventoryMTH)   
+    elif (i-1) % num_lines == 31 : 
+        company = (i-1) // num_lines 
+        AccountingorlegalMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        AccountingorlegalMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllAccountingorlegalMMYY.update(AccountingorlegalMMYY)
+        AllAccountingorlegalMTH.update(AccountingorlegalMTH)   
+    elif (i-1) % num_lines == 32 : 
+        company = (i-1) // num_lines 
+        TotalOtherExpensesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TotalOtherExpensesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTotalOtherExpensesMMYY.update(TotalOtherExpensesMMYY)
+        AllTotalOtherExpensesMTH.update(TotalOtherExpensesMTH)   
+    elif (i-1) % num_lines == 33 : 
+        company = (i-1) // num_lines 
+        OtherPctMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        OtherPctMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllOtherPctMMYY.update(OtherPctMMYY)
+        AllOtherPctMTH.update(OtherPctMTH)   
+    elif (i-1) % num_lines == 34 : 
+        company = (i-1) // num_lines 
+        TotalOperatingExpensesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TotalOperatingExpensesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTotalOperatingExpensesMMYY.update(TotalOperatingExpensesMMYY)
+        AllTotalOperatingExpensesMTH.update(TotalOperatingExpensesMTH)    
+    elif (i-1) % num_lines == 35 : 
+        company = (i-1) // num_lines 
+        ProfitBeforeInterestandTaxesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        ProfitBeforeInterestandTaxesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllProfitBeforeInterestandTaxesMMYY.update(ProfitBeforeInterestandTaxesMMYY)
+        AllProfitBeforeInterestandTaxesMTH.update(ProfitBeforeInterestandTaxesMTH)
+    elif (i-1) % num_lines == 36 : 
+        company = (i-1) // num_lines 
+        InterestExpenseShort_termMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        InterestExpenseShort_termMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllInterestExpenseShort_termMMYY.update(InterestExpenseShort_termMMYY)
+        AllInterestExpenseShort_termMTH.update(InterestExpenseShort_termMTH)
+    elif (i-1) % num_lines == 37 : 
+        company = (i-1) // num_lines 
+        InterestExpenseLong_termMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        InterestExpenseLong_termMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllInterestExpenseLong_termMMYY.update(InterestExpenseLong_termMMYY)
+        AllInterestExpenseLong_termMTH.update(InterestExpenseLong_termMTH)   
+    elif (i-1) % num_lines == 38 : 
+        company = (i-1) // num_lines 
+        TaxesIncurredMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TaxesIncurredMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTaxesIncurredMMYY.update(TaxesIncurredMMYY)
+        AllTaxesIncurredMTH.update(TaxesIncurredMTH)   
+    elif (i-1) % num_lines == 39 : 
+        company = (i-1) // num_lines 
+        ExtraordinaryItemsMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        ExtraordinaryItemsMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllExtraordinaryItemsMMYY.update(ExtraordinaryItemsMMYY)
+        AllExtraordinaryItemsMTH.update(ExtraordinaryItemsMTH)   
+    elif (i-1) % num_lines == 40 : 
+        company = (i-1) // num_lines 
+        NetProfitMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        NetProfitMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllNetProfitMMYY.update(NetProfitMMYY)
+        AllNetProfitMTH.update(NetProfitMTH)   
+    elif (i-1) % num_lines == 41 : 
+        company = (i-1) // num_lines 
+        NetProfittoSalesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        NetProfittoSalesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllNetProfittoSalesMMYY.update(NetProfittoSalesMMYY)
+        AllNetProfittoSalesMTH.update(NetProfittoSalesMTH)   
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  #print(DirectCostofSalesMMYY)  
+  #print(NetProfittoSalesMMYY)
+  #print(AllSalesMMYY)
+  #print(AllSalesMTH)
+  print(AllNetProfittoSalesMMYY)
+  #print(AllDirectCostofSalesMTH)
+
+  #print(CompanyMMYY)
+  #print(CompanyMTH)  
+```
+
+```{python}
+
+```
+
+```{python}
+months = first_rowMMYY
+```
+
+```{python}
+AllSalesValueMMYY = {}
+AllSalesValueMTH = {}
+AllDirectCostofSalesValueMMYY = {}
+AllDirectCostofSalesValueMTH = {}
+
+
+def SalesValue(pnl_item1, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllSalesValueMMYY[period] =float(pnl_item1[period]) 
+      #print(period, TotalIncomeValueMMYY)
+    for i, period in enumerate(periods2) :
+      AllSalesValueMTH[period] = float(pnl_item2[period]) 
+    return AllSalesValueMMYY, AllSalesValueMTH    
+
+SalesValue(AllSalesMMYY, AllSalesMTH)
+
+#print(AllSalesValueMMYY, AllSalesValueMTH)
+
+def DirectCostofSales(pnl_item1, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllDirectCostofSalesValueMMYY[period] = float(pnl_item1[period]) 
+      #print(period, TotalIncomeValueMMYY)
+    for i, period in enumerate(periods2) :
+      AllDirectCostofSalesValueMTH[period] = float(pnl_item2[period]) 
+    return AllDirectCostofSalesValueMMYY, AllDirectCostofSalesValueMTH    
+
+DirectCostofSales(AllDirectCostofSalesMMYY, AllDirectCostofSalesMTH)
+
+print(AllDirectCostofSalesValueMMYY, AllDirectCostofSalesValueMTH)
+
+```
+
+```{python}
+import csv
+with open('\\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\BSv2.csv', 'r') as file :
+  BS = csv.reader(file)
+
+  AllAssetsMMYY = {}
+  AllShortTermAssetsMMYY = {}
+  AllCashMMYY = {}
+  AllAccountsReceivableMMYY = {}
+  AllInventoryMMYY = {}  
+  AllOtherShortTermAssetsMMYY = {}
+  AllTotalShortTermAssetsMMYY = {}
+  AllLongTermAssetsMMYY = {}
+  AllCapitalAssetsMMYY = {}
+  AllAccumulatedDepreciationMMYY = {}
+  AllTotalLongTermAssetsMMYY = {}
+  AllTotalAssetsMMYY = {}
+  AllLiabilitiesAndCapitalMMYY = {}
+  AllAccountsPayableMMYY = {}
+  AllShortTermNotesMMYY = {}
+  AllOtherShortTermLiabilitiesMMYY = {}
+  AllSubtotalShortTermLiabilitiesMMYY = {}
+  AllLongTermLiabilitiesMMYY = {}
+  AllTotalLiabilitiesMMYY = {}
+  AllPaidInCapitalMMYY = {}
+  AllDividendsPaidMMYY = {}
+  AllRetainedEarningsMMYY = {}
+  AllEarningsMMYY = {}
+  AllTotalCapitalMMYY = {}
+  AllTotalLiabilitiesAndCapitalMMYY = {}
+  AllNetWorthMMYY = {}
+      
+  AllAssetsMTH = {}
+  AllShortTermAssetsMTH = {}
+  AllCashMTH = {}
+  AllAccountsReceivableMTH = {}
+  AllInventoryMTH = {}   
+  AllOtherShortTermAssetsMTH = {}
+  AllTotalShortTermAssetsMTH = {}
+  AllLongTermAssetsMTH = {}
+  AllCapitalAssetsMTH = {}
+  AllAccumulatedDepreciationMTH = {}
+  AllTotalLongTermAssetsMTH = {}
+  AllTotalAssetsMTH = {}
+  AllLiabilitiesAndCapitalMTH = {}
+  AllAccountsPayableMTH = {}
+  AllShortTermNotesMTH = {}
+  AllOtherShortTermLiabilitiesMTH = {}
+  AllSubtotalShortTermLiabilitiesMTH = {}
+  AllLongTermLiabilitiesMTH = {}
+  AllTotalLiabilitiesMTH = {}
+  AllPaidInCapitalMTH = {}
+  AllDividendsPaidMTH = {}
+  AllRetainedEarningsMTH = {}
+  AllEarningsMTH = {}
+  AllTotalCapitalMTH = {}
+  AllTotalLiabilitiesAndCapitalMTH = {}
+  AllNetWorthMTH = {}
+  
+    
+  CompanyTimeSliceMMYY = []
+  CompanyTimeSliceMTH = []
+  CompanyMMYY = ()
+  CompanyMTH = ()
+  company = []
+  num_companies = 2
+  coordinate = []
+
+  first_rowMTH= []
+  
+  num_lines = 26
+  for i, row in enumerate(BS) :
+    if i == 0 :
+        first_rowMMYY = row[1:]
+        for j in range (len(row)-1) :
+           first_rowMTH.append(len(row) - j - 2 )
+           
+        for company in range (num_companies) :
+           for month in first_rowMMYY :
+              coordinate = (company, month)   
+              CompanyTimeSliceMMYY.append(coordinate)
+        CompanyMMYY = tuple(CompanyTimeSliceMMYY)    
+
+        for company in range (num_companies) :
+           for month in first_rowMTH :
+              coordinate = (company, month)   
+              CompanyTimeSliceMTH.append(coordinate)
+        CompanyMTH = tuple(CompanyTimeSliceMTH)  
+        
+    elif (i-1) % num_lines == 0 :
+        company = (i-1) // num_lines 
+        AssetsMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        AssetsMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllAssetsMMYY.update(AssetsMMYY)
+        AllAssetsMTH.update(AssetsMTH)
+    elif (i-1) % num_lines == 1 : 
+        company = (i-1) // num_lines 
+        ShortTermAssetsMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        ShortTermAssetsMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllShortTermAssetsMMYY.update(ShortTermAssetsMMYY)
+        AllShortTermAssetsMTH.update(ShortTermAssetsMTH)
+    elif (i-1) % num_lines == 2 : 
+        company = (i-1) // num_lines 
+        CashMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        CashMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllCashMMYY.update(CashMMYY)
+        AllCashMTH.update(CashMTH)
+    elif (i-1) % num_lines == 3 : 
+        company = (i-1) // num_lines 
+        AccountsReceivableMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        AccountsReceivableMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllAccountsReceivableMMYY.update(OtherMMYY)
+        AllAccountsReceivableMTH.update(OtherMTH)   
+    elif (i-1) % num_lines == 4 : 
+        company = (i-1) // num_lines 
+        InventoryMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        InventoryMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllInventoryMMYY.update(InventoryMMYY)
+        AllInventoryMTH.update(InventoryMTH)   
+    elif (i-1) % num_lines == 5 : 
+        company = (i-1) // num_lines 
+        OtherShortTermAssetsMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        OtherShortTermAssetsMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllOtherShortTermAssetsMMYY.update(OtherShortTermAssetsMMYY)
+        AllOtherShortTermAssetsMTH.update(OtherShortTermAssetsMTH)
+    elif (i-1) % num_lines == 6 : 
+        company = (i-1) // num_lines 
+        TotalShortTermAssetsMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TotalShortTermAssetsMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTotalShortTermAssetsMMYY.update(TotalShortTermAssetsMMYY)
+        AllTotalShortTermAssetsMTH.update(TotalShortTermAssetsMTH)   
+    elif (i-1) % num_lines == 7 : 
+        company = (i-1) // num_lines 
+        LongTermAssetsMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        LongTermAssetsMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllLongTermAssetsMMYY.update(LongTermAssetsMMYY)
+        AllLongTermAssetsMTH.update(LongTermAssetsMTH)   
+    elif (i-1) % num_lines == 8 : 
+        company = (i-1) // num_lines 
+        CapitalAssetsMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        CapitalAssetsMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllCapitalAssetsMMYY.update(CapitalAssetsMMYY)
+        AllCapitalAssetsMTH.update(CapitalAssetsMTH)   
+    elif (i-1) % num_lines == 9 : 
+        company = (i-1) // num_lines 
+        AccumulatedDepreciationMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        AccumulatedDepreciationMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllAccumulatedDepreciationMMYY.update(AccumulatedDepreciationMMYY)
+        AllAccumulatedDepreciationMTH.update(AccumulatedDepreciationMTH)   
+    elif (i-1) % num_lines == 10 : 
+        company = (i-1) // num_lines 
+        TotalLongTermAssetsMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TotalLongTermAssetsMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTotalLongTermAssetsMMYY.update(TotalLongTermAssetsMMYY)
+        AllTotalLongTermAssetsMTH.update(TotalLongTermAssetsMTH)   
+    elif (i-1) % num_lines == 11 : 
+        company = (i-1) // num_lines 
+        TotalAssetsMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TotalAssetsMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTotalAssetsMMYY.update(TotalAssetsMMYY)
+        AllTotalAssetsMTH.update(TotalAssetsMTH)   
+    elif (i-1) % num_lines == 12 : 
+        company = (i-1) // num_lines 
+        LiabilitiesAndCapitalMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        LiabilitiesAndCapitalMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllLiabilitiesAndCapitalMMYY.update(LiabilitiesAndCapitalMMYY)
+        AllLiabilitiesAndCapitalMTH.update(LiabilitiesAndCapitalMTH)   
+    elif (i-1) % num_lines == 13 : 
+        company = (i-1) // num_lines 
+        AccountsPayableMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        AccountsPayableMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllAccountsPayableMMYY.update(AccountsPayableMMYY)
+        AllAccountsPayableMTH.update(AccountsPayableMTH)   
+    elif (i-1) % num_lines == 14 : 
+        company = (i-1) // num_lines 
+        ShortTermNotesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        ShortTermNotesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllShortTermNotesMMYY.update(ShortTermNotesMMYY)
+        AllShortTermNotesMTH.update(ShortTermNotesMTH)
+    elif (i-1) % num_lines == 15 : 
+        company = (i-1) // num_lines 
+        OtherShortTermLiabilitiesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        OtherShortTermLiabilitiesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllOtherShortTermLiabilitiesMMYY.update(OtherShortTermLiabilitiesMMYY)
+        AllOtherShortTermLiabilitiesMTH.update(OtherShortTermLiabilitiesMTH)
+    elif (i-1) % num_lines == 16 : 
+        company = (i-1) // num_lines 
+        SubtotalShortTermLiabilitiesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        SubtotalShortTermLiabilitiesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllSubtotalShortTermLiabilitiesMMYY.update(SubtotalShortTermLiabilitiesMMYY)
+        AllSubtotalShortTermLiabilitiesMTH.update(SubtotalShortTermLiabilitiesMTH)
+    elif (i-1) % num_lines == 17 : 
+        company = (i-1) // num_lines 
+        LongTermLiabilitiesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        LongTermLiabilitiesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllLongTermLiabilitiesMMYY.update(LongTermLiabilitiesMMYY)
+        AllLongTermLiabilitiesMTH.update(LongTermLiabilitiesMTH)  
+    elif (i-1) % num_lines == 18 : 
+        company = (i-1) // num_lines 
+        TotalLiabilitiesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TotalLiabilitiesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTotalLiabilitiesMMYY.update(TotalLiabilitiesMMYY)
+        AllTotalLiabilitiesMTH.update(TotalLiabilitiesMTH)   
+    elif (i-1) % num_lines == 19 : 
+        company = (i-1) // num_lines 
+        PaidInCapitalMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        PaidInCapitalMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllPaidInCapitalMMYY.update(PaidInCapitalMMYY)
+        AllPaidInCapitalMTH.update(PaidInCapitalMTH)   
+    elif (i-1) % num_lines == 20 : 
+        company = (i-1) // num_lines 
+        DividendsPaidMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        DividendsPaidMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllDividendsPaidMMYY.update(DividendsPaidMMYY)
+        AllDividendsPaidMTH.update(DividendsPaidMTH)   
+    elif (i-1) % num_lines == 21 : 
+        company = (i-1) // num_lines 
+        RetainedEarningsMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        RetainedEarningsMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllRetainedEarningsMMYY.update(RetainedEarningsMMYY)
+        AllRetainedEarningsMTH.update(RetainedEarningsMTH)   
+    elif (i-1) % num_lines == 22 : 
+        company = (i-1) // num_lines 
+        EarningsMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        EarningsMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllEarningsMMYY.update(EarningsMMYY)
+        AllEarningsMTH.update(EarningsMTH)   
+    elif (i-1) % num_lines == 23 : 
+        company = (i-1) // num_lines 
+        TotalCapitalMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TotalCapitalMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTotalCapitalMMYY.update(TotalCapitalMMYY)
+        AllTotalCapitalMTH.update(TotalCapitalMTH)   
+    elif (i-1) % num_lines == 24 : 
+        company = (i-1) // num_lines 
+        TotalLiabilitiesAndCapitalMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        TotalLiabilitiesAndCapitalMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllTotalLiabilitiesAndCapitalMMYY.update(TotalLiabilitiesAndCapitalMMYY)
+        AllTotalLiabilitiesAndCapitalMTH.update(TotalLiabilitiesAndCapitalMTH)   
+    elif (i-1) % num_lines == 25 : 
+        company = (i-1) // num_lines 
+        NetWorthMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+        NetWorthMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), row[1:] ))
+        AllNetWorthMMYY.update(NetWorthMMYY)
+        AllNetWorthMTH.update(NetWorthMTH)    
+
+        
+  print(AllEarningsMMYY)
+  print(AllEarningsMTH)
+```
+
+```{python}
+#placeholder for long term notes
+
+
+AllLongTermNotesMMYY = {}
+AllLongTermNotesMTH = {}
+
+for company in range(num_companies) :
+   LongTermNotesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), [0]* len(first_rowMMYY)))
+   LongTermNotesMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), [0]* len(first_rowMMYY) ))
+   AllLongTermNotesMMYY.update(LongTermNotesMMYY)
+   AllLongTermNotesMTH.update(LongTermNotesMTH)  
+
+print(AllLongTermNotesMMYY)
+```
+
+```{python}
+AllSalesValueMMYY = {}
+AllSalesValueMTH = {}
+AllDirectCostofSalesValueMMYY = {}
+AllDirectCostofSalesValueMTH = {}
+
+
+def SalesValue(pnl_item1, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllSalesValueMMYY[period] =float(pnl_item1[period]) 
+      #print(period, TotalIncomeValueMMYY)
+    for i, period in enumerate(periods2) :
+      AllSalesValueMTH[period] = float(pnl_item2[period]) 
+    return AllSalesValueMMYY, AllSalesValueMTH    
+
+SalesValue(AllSalesMMYY, AllSalesMTH)
+
+#print(AllSalesValueMMYY, AllSalesValueMTH)
+
+def DirectCostofSales(pnl_item1, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllDirectCostofSalesValueMMYY[period] = float(pnl_item1[period]) 
+      #print(period, TotalIncomeValueMMYY)
+    for i, period in enumerate(periods2) :
+      AllDirectCostofSalesValueMTH[period] = float(pnl_item2[period]) 
+    return AllDirectCostofSalesValueMMYY, AllDirectCostofSalesValueMTH    
+
+DirectCostofSales(AllDirectCostofSalesMMYY, AllDirectCostofSalesMTH)
+
+print(AllDirectCostofSalesValueMMYY, AllDirectCostofSalesValueMTH)
+
+
+
+```
+
+```{python}
+print(AllTotalShortTermAssetsMMYY[(0, '17-Dec')])
+```
+
+```{python}
+AllTotalCurrentAssetsValueMMYY = {}
+AllTotalCurrentLiabilitiesValueMMYY = {}
+AllTotalEquityValueMMYY = {}
+AllLongTermLiabilitiesValueMMYY = {}
+AllOperatingExpensesValueMMYY = {}
+
+AllTotalCurrentAssetsValueMTH = {}
+AllTotalCurrentLiabilitiesValueMTH = {}
+AllTotalEquityValueMTH = {}
+AllLongTermLiabilitiesValueMTH = {}
+AllOperatingExpensesValueMTH = {}
+
+
+
+def TotalCurrentAssetsValue (bs_item1, bs_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllTotalCurrentAssetsValueMMYY[period] =  float(bs_item1[period])
+    for i, period in enumerate(periods2) :
+      AllTotalCurrentAssetsValueMTH[period] =  float(bs_item2[period])
+    return AllTotalCurrentAssetsValueMMYY, AllTotalCurrentAssetsValueMTH    
+
+TotalCurrentAssetsValue(AllTotalShortTermAssetsMMYY, AllTotalShortTermAssetsMTH)
+
+#print(AllTotalCurrentAssetsValueMMYY, AllTotalCurrentAssetsValueMTH)
+
+def TotalCurrentLiabilitiesValue (bs_item1, bs_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllTotalCurrentLiabilitiesValueMMYY[period] =  float(bs_item1[period])
+    for i, period in enumerate(periods2) :
+      AllTotalCurrentLiabilitiesValueMTH[period] =  float(bs_item2[period])
+    return AllTotalCurrentLiabilitiesValueMMYY, AllTotalCurrentLiabilitiesValueMTH    
+
+TotalCurrentLiabilitiesValue(AllSubtotalShortTermLiabilitiesMMYY, AllSubtotalShortTermLiabilitiesMTH)
+
+#print(TotalCurrentLiabilitiesValueMMYY, TotalCurrentLiabilitiesValueMTH )
+
+def TotalEquityValue (bs_item1, bs_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllTotalEquityValueMMYY[period] =  float(bs_item1[period])
+    for i, period in enumerate(periods2) :
+      AllTotalEquityValueMTH[period] =  float(bs_item2[period])
+    return AllTotalEquityValueMMYY, AllTotalEquityValueMTH    
+
+TotalEquityValue(AllTotalCapitalMMYY, AllTotalCapitalMTH)
+
+#print(TotalEquityValueMMYY, TotalEquityValueMTH )
+
+def LongTermLiabilitiesValue (bs_item1, bs_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      if bs_item1[period] == '' :
+        AllLongTermLiabilitiesValueMMYY[period] =  0
+      else :  
+        AllLongTermLiabilitiesValueMMYY[period] =  float(bs_item1[period])
+    for i, period in enumerate(periods2) :
+      if bs_item2[period] == '' :   
+        AllLongTermLiabilitiesValueMTH[period] =  0
+      else :
+        AllLongTermLiabilitiesValueMTH[period] =  float(bs_item2[period])
+    return AllLongTermLiabilitiesValueMMYY, AllLongTermLiabilitiesValueMTH    
+
+#print(LongTermLiabilitiesMMYY, LongTermLiabilitiesMTH)
+
+LongTermLiabilitiesValue(AllLongTermLiabilitiesMMYY, AllLongTermLiabilitiesMTH)
+
+#print(LongTermLiabilitiesValueMMYY, LongTermLiabilitiesValueMTH)
+
+def OperatingExpensesValue (pnl_item1, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllOperatingExpensesValueMMYY[period] =float(pnl_item1[period]) 
+      #print(period, TotalIncomeValueMMYY)
+    for i, period in enumerate(periods2)  :
+      AllOperatingExpensesValueMTH[period] = float(pnl_item2[period]) 
+    return AllOperatingExpensesValueMMYY, AllOperatingExpensesValueMTH    
+
+OperatingExpensesValue(AllTotalOperatingExpensesMMYY, AllTotalOperatingExpensesMTH)
+
+#print(AllOperatingExpensesValueMMYY, AllOperatingExpensesValueMTH, months)
+
+```
+
+```{python}
+
+
+AllTotalNetAssetsValueMMYY = {}
+AllTotalFixedAssetValueMMYY = {}
+AllTotalIncomeValueMMYY = {}
+AllOtherIncomeValueMMYY = {}
+AllOwnersFundsValueMMYY = {}
+AllSalesValueMMYY = {}
+AllOperatingCostsValueMMYY = {}
+AllPBITValueMMYY = {}
+AllInterestValueMMYY = {}
+AllTaxValueMMYY = {}
+
+AllTotalNetAssetsValueMTH = {}
+AllTotalFixedAssetValueMTH = {}
+AllTotalIncomeValueMTH = {}
+AllOtherIncomeValueMTH = {}
+AllOwnersFundsValueMTH = {}
+AllSalesValueMTH = {}
+AllOperatingCostsValueMTH = {}
+AllPBITValueMTH = {}
+AllInterestValueMTH = {}
+AllTaxValueMTH = {}
+
+
+
+
+def TotalNetAssetsValue(bs_item1, bs_item2, bs_item3, bs_item4, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllTotalNetAssetsValueMMYY[period] = float(bs_item1[period])- float(bs_item2[period])
+    for i, period in enumerate(periods2)  :
+      AllTotalNetAssetsValueMTH[period] = float(bs_item3[period]) - float(bs_item4[period])
+    return AllTotalNetAssetsValueMMYY, AllTotalNetAssetsValueMTH
+
+TotalNetAssetsValue(AllTotalAssetsMMYY, AllTotalLiabilitiesMMYY, AllTotalAssetsMTH, AllTotalLiabilitiesMTH)
+
+#print(AllTotalNetAssetsValueMMYY, AllTotalNetAssetsValueMTH)
+
+
+def TotalFixedAssetValue (bs_item1, bs_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllTotalFixedAssetValueMMYY[period] =  float(bs_item1[period])
+    for i, period in enumerate(periods2)  :
+      AllTotalFixedAssetValueMTH[period] =  float(bs_item2[period])
+    return AllTotalFixedAssetValueMMYY, AllTotalFixedAssetValueMTH    
+
+TotalFixedAssetValue(AllTotalLongTermAssetsMMYY, AllTotalLongTermAssetsMTH)
+
+#print(TotalFixedAssetValueMMYY, TotalFixedAssetValueMTH)
+
+def TotalIncomeValue (pnl_item1, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllTotalIncomeValueMMYY[period] =float(pnl_item1[period]) 
+      #print(period, TotalIncomeValueMMYY)
+    for i, period in enumerate(periods2)  :
+      AllTotalIncomeValueMTH[period] = float(pnl_item2[period]) 
+    return AllTotalIncomeValueMMYY, AllTotalIncomeValueMTH    
+
+TotalIncomeValue(AllSalesMMYY, AllSalesMTH)
+
+#print(SalesMMYY, SalesMTH, months)
+#print(TotalIncomeValueMMYY, TotalIncomeValueMTH)
+
+def OtherIncomeValue (periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllOtherIncomeValueMMYY[period] = 0.0 
+    for i, period in enumerate(periods2)  :
+      AllOtherIncomeValueMTH[period] = 0.0
+    return AllOtherIncomeValueMMYY, AllOtherIncomeValueMTH   
+
+OtherIncomeValue()
+
+#print(OtherIncomeValueMMYY, OtherIncomeValueMTH)
+
+def OwnersFundsValue (bs_item1, bs_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllOwnersFundsValueMMYY[period] =float(bs_item1[period]) 
+      #print(period, TotalIncomeValueMMYY)
+    for i, period in enumerate(periods2)  :
+      AllOwnersFundsValueMTH[period] = float(bs_item2[period]) 
+    return AllOwnersFundsValueMMYY, AllOwnersFundsValueMTH    
+
+
+OwnersFundsValue(AllTotalCapitalMMYY, AllTotalCapitalMTH)
+
+#print(OwnersFundsValueMMYY, OwnersFundsValueMTH)
+
+
+def SalesValue(pnl_item1, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllSalesValueMMYY[period] =float(pnl_item1[period]) 
+      #print(period, TotalIncomeValueMMYY)
+    for i, period in enumerate(periods2)  :
+      AllSalesValueMTH[period] = float(pnl_item2[period]) 
+    return AllSalesValueMMYY, AllSalesValueMTH    
+
+SalesValue(AllSalesMMYY, AllSalesMTH)
+
+#print(SalesValueMMYY, SalesValueMTH, months)
+
+
+def OperatingCostsValue(pnl_item1, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllOperatingCostsValueMMYY[period] =float(pnl_item1[period]) 
+      #print(period, TotalIncomeValueMMYY)
+    for i, period in enumerate(periods2)  :
+      AllOperatingCostsValueMTH[period] = float(pnl_item2[period]) 
+    return AllOperatingCostsValueMMYY, AllOperatingCostsValueMTH    
+
+
+OperatingCostsValue(AllOperatingExpensesMMYY, AllOperatingExpensesMTH)
+
+#print(OperatingCostsValueMMYY, OperatingCostsValueMTH)
+
+def PBITValue(pnl_item1, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllPBITValueMMYY[period] =float(pnl_item1[period]) 
+      #print(period, TotalIncomeValueMMYY)
+    for i, period in enumerate(periods2) :
+      AllPBITValueMTH[period] = float(pnl_item2[period]) 
+    return AllPBITValueMMYY, AllPBITValueMTH    
+
+
+PBITValue(AllProfitBeforeInterestandTaxesMMYY, AllProfitBeforeInterestandTaxesMTH)
+
+#print(PBITValueMMYY, PBITValueMTH)
+
+
+def InterestValue(pnl_item1, pnl_item2, pnl_item3, pnl_item4, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllInterestValueMMYY[period] = float(pnl_item1[period]) + float(pnl_item2[period])
+    for i, period in enumerate(periods2)  :
+      AllInterestValueMTH[period] = float(pnl_item3[period]) + float(pnl_item4[period])
+    return AllInterestValueMMYY, AllInterestValueMTH
+
+InterestValue(AllInterestExpenseShort_termMMYY, AllInterestExpenseLong_termMMYY, AllInterestExpenseShort_termMTH, AllInterestExpenseLong_termMTH)
+
+#print(InterestValueMMYY, InterestValueMTH)
+
+        
+def TaxValue(pnl_item1, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllTaxValueMMYY[period] =float(pnl_item1[period]) 
+      #print(period, TotalIncomeValueMMYY)
+    for i, period in enumerate(periods2)  :
+      AllTaxValueMTH[period] = float(pnl_item2[period]) 
+    return AllTaxValueMMYY, AllTaxValueMTH        
+
+TaxValue(AllTaxesIncurredMMYY, AllTaxesIncurredMTH)
+
+#print(TaxValueMMYY, TaxValueMTH)
+
+```
+
+```{python}
+print(AllNetProfitMMYY)
+```
+
+```{python}
+AllPATValueMMYY = {}
+AllDividendValueMMYY = {}
+AllRetainedEarningsValueMMYY = {}
+AllOrdinaryShareNumberMMYY = {}
+AllOrdinarySharePriceValueMMYY = {}
+AllROIPctMMYY = {}
+AllROTAPctMMYY = {}
+AllLiquidityCurrentRatioMMYY = {}
+AllLiquidityQuickRatioMMYY = {}
+AllWorkingCapitalSalesRatioMMYY = {}
+AllInterestCoverRatioMMYY = {}
+
+AllPATValueMTH = {}
+AllDividendValueMTH = {}
+AllRetainedEarningsValueMTH = {}
+AllOrdinaryShareNumberMTH = {}
+AllOrdinarySharePriceValueMTH = {}
+AllROIPctMTH = {}
+AllROTAPctMTH = {}
+AllLiquidityCurrentRatioMTH = {}
+AllLiquidityQuickRatioMTH = {}
+AllWorkingCapitalSalesRatioMTH = {}
+AllInterestCoverRatioMTH = {}
+
+        
+def PATValue(pnl_item1, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllPATValueMMYY[period] = float(pnl_item1[period]) 
+      #print(period, TotalIncomeValueMMYY)
+    for i, period in enumerate(periods2) :
+      AllPATValueMTH[period] = float(pnl_item2[period]) 
+    return AllPATValueMMYY, AllPATValueMTH        
+
+PATValue(AllNetProfitMMYY, AllNetProfitMTH)
+
+#print(PATValueMMYY, PATValueMTH )
+
+#PATValue
+#NetProfitMMYY
+
+
+def DividendValue (periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllDividendValueMMYY[period] = 0
+    for i, period in enumerate(periods2) :
+      AllDividendValueMTH[period] = 0
+    return AllDividendValueMMYY, AllDividendValueMTH   
+
+DividendValue()
+
+#print(DividendValueMMYY, DividendValueMTH  )
+
+#DividendValue
+#DK
+
+
+
+def RetainedEarningsValue (bs_item1, bs_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllRetainedEarningsValueMMYY[period] =float(bs_item1[period])
+    for i, period in enumerate(periods2) :
+      AllRetainedEarningsValueMTH[period] = float(bs_item2[period]) 
+    return AllRetainedEarningsValueMMYY, AllRetainedEarningsValueMTH    
+
+RetainedEarningsValue (AllRetainedEarningsMMYY, AllRetainedEarningsMTH)
+#print(RetainedEarningsValueMMYY, RetainedEarningsValueMTH     )
+
+#RetainedEarningsValue
+#BS
+#RetainedEarningsMMYY
+
+def OrdinaryShareNumber (periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllOrdinaryShareNumberMMYY[period] = 0
+    for i, period in enumerate(periods2):
+      AllOrdinaryShareNumberMTH[period] = 0
+    return AllOrdinaryShareNumberMMYY, AllOrdinaryShareNumberMTH   
+
+OrdinaryShareNumber()
+
+#print(OrdinaryShareNumberMMYY, OrdinaryShareNumberMTH  )
+
+#OrdinaryShareNumber
+#DK
+
+
+def OrdinarySharePriceValue (periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllOrdinarySharePriceValueMMYY[period] = 0 
+    for i, period in enumerate(periods2) :
+      AllOrdinarySharePriceValueMTH[period] = 0
+    return AllOrdinarySharePriceValueMMYY, AllOrdinarySharePriceValueMTH   
+
+OrdinarySharePriceValue()
+
+#print(OrdinarySharePriceValueMMYY, OrdinarySharePriceValueMTH  )
+
+def ROIPct (periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllROIPctMMYY[period] = 0 
+    for i, period in enumerate(periods2) :
+      AllROIPctMTH[i] = 0
+    return AllROIPctMMYY, AllROIPctMTH   
+
+ROIPct()
+
+#print(ROIPercentMMYY, ROIPercentMTH  )
+
+
+#ROIPercent
+#DK
+
+def ROTAPct (pnl_item1, pnl_item2, bs_item1, bs_item2, bs_item3, bs_item4, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllROTAPctMMYY[period] = float(pnl_item1[period])/(float(bs_item1[period]) + float(bs_item2[period])) 
+    for i, period in enumerate(periods2) :
+      AllROTAPctMTH[period] =float(pnl_item2[period])/(float(bs_item3[period]) + float(bs_item4[period])) 
+    return AllROTAPctMMYY, AllROTAPctMTH    
+
+ROTAPct(AllNetProfitMMYY, AllNetProfitMTH, AllTotalShortTermAssetsMMYY, AllTotalLongTermAssetsMMYY,AllTotalShortTermAssetsMTH, AllTotalLongTermAssetsMTH)
+
+#print(ROTAPercentMMYY, ROTAPercentMTH )
+
+#ROTAPercent
+
+
+
+def LiquidityCurrentRatio (bs_item1, bs_item2, bs_item3, bs_item4, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllLiquidityCurrentRatioMMYY[period] =float(bs_item1[period]) / float(bs_item2[period]) 
+    for i, period in enumerate(periods2):
+      AllLiquidityCurrentRatioMTH[period] = float(bs_item3[period]) / float(bs_item4[period]) 
+    return AllLiquidityCurrentRatioMMYY, AllLiquidityCurrentRatioMTH    
+
+
+LiquidityCurrentRatio (AllTotalShortTermAssetsMMYY, AllSubtotalShortTermLiabilitiesMMYY, AllTotalShortTermAssetsMTH, AllSubtotalShortTermLiabilitiesMTH)
+
+
+#print(LiquidityCurrentRatioMMYY, LiquidityCurrentRatioMTH )
+
+
+
+
+#LiquidityQuickRatio
+#(TotalCurrentAssetValueMMYY - InventoryMMYY)/ TotalCurrentLiabilitiesValueMMYY
+
+def LiquidityQuickRatio (bs_item1, bs_item2,bs_item3, bs_item4,bs_item5, bs_item6, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllLiquidityQuickRatioMMYY[period] =(float(bs_item1[period]) - float(bs_item2[period])) / float(bs_item3[period]) 
+    for i, period in enumerate(periods2) :
+      AllLiquidityQuickRatioMTH[period] = (float(bs_item4[period])  - float(bs_item5[period])) / float(bs_item6[period])
+    return AllLiquidityQuickRatioMMYY, AllLiquidityQuickRatioMTH    
+
+LiquidityQuickRatio (AllTotalShortTermAssetsMMYY, AllInventoryMMYY, AllSubtotalShortTermLiabilitiesMMYY, AllTotalShortTermAssetsMTH, AllInventoryMTH, AllSubtotalShortTermLiabilitiesMTH)
+
+#print(LiquidityQuickRatioMMYY, LiquidityQuickRatioMTH)
+
+#WorkingCapitalSalesRatio
+#(TotalCurrentAssetValueMMYY - TotalCurrentLiabilitiesValueMMYY)/ SalesMMYY
+
+def WorkingCapitalSalesRatio (bs_item1, bs_item2, pnl_item1, bs_item3, bs_item4, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1)  :
+      AllWorkingCapitalSalesRatioMMYY[period] =(float(bs_item1[period]) - float(bs_item2[period])) / float(pnl_item1[period])
+    for i, period in enumerate(periods2) :
+      AllWorkingCapitalSalesRatioMTH[period] = (float(bs_item3[period]) - float(bs_item4[period])) / float(pnl_item2[period])
+    return AllWorkingCapitalSalesRatioMMYY, AllWorkingCapitalSalesRatioMTH    
+
+WorkingCapitalSalesRatio (AllTotalShortTermAssetsMMYY, AllSubtotalShortTermLiabilitiesMMYY, AllSalesMMYY, AllTotalShortTermAssetsMTH, AllSubtotalShortTermLiabilitiesMTH, AllSalesMTH)
+
+#print(WorkingCapitalSalesRatioMMYY, WorkingCapitalSalesRatioMTH)
+
+
+#InterestCover
+#PBITValueMMYY/ InterestValueMMYY
+
+
+def InterestCoverRatio (pnl_item1, pnl_item2, pnl_item3, pnl_item4, periods1=CompanyMMYY, periods2=CompanyMTH) :
+   for i, period in enumerate(periods1)  :
+     AllInterestCoverRatioMMYY[period] =float(pnl_item1[period]) / float(pnl_item2[period]) 
+   for i, period in enumerate(periods2) :
+     AllInterestCoverRatioMTH[period] = float(pnl_item3[period]) / float(pnl_item4[period]) 
+   return AllInterestCoverRatioMMYY, AllInterestCoverRatioMTH    
+
+
+InterestCoverRatio (AllPBITValueMMYY, AllInterestValueMMYY, AllPBITValueMTH, AllInterestValueMTH)
+
+#print(AllInterestCoverRatioMMYY, AllInterestCoverRatioMTH)
+
+```
+
+```{python}
+print(AllDividendValueMMYY, AllDividendValueMTH  )
+```
+
+```{python}
+AllDebtToEquityPctMMYY = {} 
+AllLeverageRatioMMYY = {}
+AllCashflowStatementValueMMYY = {}
+AllSourceUseOfFundsValueMMYY = {}
+AllOpeningAndClosingCashValueMMYY = {}
+AllLongAndShortAnalysisMMYY = {}
+AllExperianCreditScoreMMYY = {}
+AllTotalIncomeValueMMYY = {}
+AllTotalCostofSalesValueMMYY = {}
+AllGrossProfitValueMMYY = {}
+#GrossMarginPctMMYY = {}
+AllROEPctMMYY= {}
+AllROCEPctMMYY= {}
+
+AllDebtToEquityPctMTH = {} 
+AllLeverageRatioMTH = {}
+AllCashflowStatementValueMTH = {}
+AllSourceUseOfFundsValueMTH = {}
+AllOpeningAndClosingCashValueMTH = {}
+AllLongAndShortAnalysisMTH = {}
+AllExperianCreditScoreMTH = {}
+AllTotalIncomeValueMTH = {}
+AllTotalCostofSalesValueMTH = {}
+AllGrossProfitValueMTH = {}
+#GrossMarginPctMTH = {}
+AllROEPctMTH= {}
+AllROCEPctMTH= {}
+
+
+#DebtToEquityPct
+#ShortTermNotesMMYY/TotalCapitalMMYY 
+
+def DebtToEquityPct (bs_item1, bs_item2, bs_item3, bs_item4,  periods1=CompanyMMYY, periods2=CompanyMTH) :
+   for i, period in enumerate(periods1) :
+     AllDebtToEquityPctMMYY[period] =float(bs_item1[period]) / float(bs_item2[period]) 
+   for i, period in enumerate(periods2) :
+     AllDebtToEquityPctMTH[period] = float(bs_item3[period]) / float(bs_item4[period]) 
+   return AllDebtToEquityPctMMYY, AllDebtToEquityPctMTH
+
+DebtToEquityPct (AllShortTermNotesMMYY, AllTotalCapitalMMYY, AllShortTermNotesMTH, AllTotalCapitalMTH)
+#print(DebtToEquityPctMMYY, DebtToEquityPctMTH)
+
+
+#Leverage
+#TotalCapitalMMYY/(ShortTermNotesMMYY + TotalCapitalMMYY) 
+
+
+def LeverageRatio (bs_item1, bs_item2, bs_item3, bs_item4, periods1=CompanyMMYY, periods2=CompanyMTH) :
+   for i, period in enumerate(periods1) :
+     AllLeverageRatioMMYY[period] =float(bs_item1[period]) / (float(bs_item2[period]) + float(bs_item1[period])) 
+   for i, period in enumerate(periods2) :
+     AllLeverageRatioMTH[period] = float(bs_item3[period]) / (float(bs_item4[period]) + float(bs_item3[period]))
+   return AllLeverageRatioMMYY, AllLeverageRatioMTH    
+
+LeverageRatio (AllTotalCapitalMMYY, AllShortTermNotesMMYY, AllTotalCapitalMTH, AllShortTermNotesMTH)
+#print(LeverageRatioMMYY, LeverageRatioMTH)
+
+#CashflowStatementValue
+
+#read in cashflow statement
+
+#SourceUseOfFundsValue
+
+#dk
+
+#OpeningAndClosingCashValue
+
+# read in cashflow statement
+
+#LongAndShortAnalysis
+
+#dk
+
+#ExperianCreditScore
+
+# commercial data
+
+#TotalIncomeValue
+# salesValueMMYY
+
+
+def TotalIncomeValue (pnl_item1, pnl_item2,  periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllTotalIncomeValueMMYY[period] =float(pnl_item1[period])
+    for i, period in enumerate(periods2) :
+      AllTotalIncomeValueMTH[period] = float(pnl_item2[period]) 
+    return AllTotalIncomeValueMMYY, AllTotalIncomeValueMTH    
+
+TotalIncomeValue (AllSalesValueMMYY, AllSalesValueMTH)
+#print(TotalIncomeValueMMYY, TotalIncomeValueMTH)
+
+
+
+#TotalCostofSalesValue
+#TotalCostofSalesMMYY
+
+
+def TotalCostofSalesValue (pnl_item1, pnl_item2,  periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllTotalCostofSalesValueMMYY[period] = float(pnl_item1[period])
+    for i, period in enumerate(periods2) :
+      AllTotalCostofSalesValueMTH[period] = float(pnl_item2[period]) 
+    return AllTotalCostofSalesValueMMYY, AllTotalCostofSalesValueMTH    
+
+TotalCostofSalesValue (AllTotalCostofSalesMMYY, AllTotalCostofSalesMTH)
+
+#print(TotalCostofSalesValueMMYY, TotalCostofSalesValueMTH)
+
+#GrossProfitValue
+#GrossMarginMMYY
+
+def GrossProfitValue (pnl_item1, pnl_item2,  periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllGrossProfitValueMMYY[period] =float(pnl_item1[period])
+    for i, period in enumerate(periods2) :
+      AllGrossProfitValueMTH[period] = float(pnl_item2[period]) 
+    return AllGrossProfitValueMMYY, AllGrossProfitValueMTH    
+
+GrossProfitValue (AllGrossMarginMMYY, AllGrossMarginMTH)
+#print(GrossProfitValueMMYY, GrossProfitValueMTH)
+
+
+#GrossMarginPct
+#GrossMarginPctMMYY
+
+#print(GrossMarginPctMMYY, GrossMarginPctMTH)
+
+
+def ROEPct (pnl_item1, bs_item1, pnl_item2, bs_item2,  periods1=CompanyMMYY, periods2=CompanyMTH) :
+   for i, period in enumerate(periods1) :
+     AllROEPctMMYY[period] =float(pnl_item1[period]) / float(bs_item1[period]) 
+   for i, period in enumerate(periods2) :
+     AllROEPctMTH[period] = float(pnl_item2[period]) / float(bs_item2[period]) 
+   return AllROEPctMMYY, AllROEPctMTH
+
+ROEPct (AllNetProfitMMYY, AllTotalCapitalMMYY, AllNetProfitMTH, AllTotalCapitalMTH)
+#print(ROEPctMMYY, ROEPctMTH)
+
+#ROCEPctMMYY
+#need to add long term notes - not in synthetic data
+
+def ROCEPct (pnl_item1, pnl_item2, pnl_item3, bs_item1, bs_item2,pnl_item4, pnl_item5, pnl_item6, bs_item3, bs_item4,  periods1=CompanyMMYY, periods2=CompanyMTH) :
+   for i, period in enumerate(periods1) :
+     AllROCEPctMMYY[period] =(float(pnl_item1[period]) + float(pnl_item2[period]) + float(pnl_item3[period])) / (float(bs_item1[period]) + float(bs_item2[period])) 
+   for i, period in enumerate(periods2):
+     AllROCEPctMTH[period] = (float(pnl_item4[period]) + float(pnl_item5[period]) + float(pnl_item6[period])) / (float(bs_item3[period]) + float(bs_item4[period]))
+   return AllROEPctMMYY, AllROEPctMTH
+
+ROCEPct (AllProfitBeforeInterestandTaxesMMYY, AllInterestExpenseShort_termMMYY, AllInterestExpenseLong_termMMYY, AllTotalCapitalMMYY, AllShortTermNotesMMYY, AllProfitBeforeInterestandTaxesMTH, AllInterestExpenseShort_termMTH, AllInterestExpenseLong_termMTH, AllTotalCapitalMTH, AllShortTermNotesMTH)
+#print(AllAllROEPctMMYY, AllROEPctMTH)
+
+
+```
+
+```{python}
+AllTotalLoanBalanceValueMMYY = {}
+AllTotalRevenueValueMMYY = {}
+
+AllTotalLoanBalanceValueMTH= {}
+AllTotalRevenueValueMTH = {}
+
+#TotalCurrentAssetValue
+#duplicate
+
+#TotalCurrentLiabilitiesValue
+#duplicate
+
+#TotalEquityValue
+#duplicate
+
+
+#PartyNarrative
+#commercial data - sic code industry narrative
+
+#OperatingExpensesValue
+#duplicate
+
+
+
+#CreditorDays
+# need to load invoice data
+
+#CreditorTotalValue
+# need to load invoice data
+
+#GrossMarginValue
+#duplicate
+
+#LongTermLiabilitiesValue
+#duplicate
+
+#OperatingIncomeValue
+#duplicate
+
+
+#DebtorDays
+# need to load invoice data
+
+#DebtorTotalValue
+# assets to loan size?
+
+
+
+#IsInArrears
+#dk - missed payment - interest payment becomes liability?
+
+#TotalLoanBalanceValue
+#ShortTermNotesMMYY
+
+
+def TotalLoanBalanceValue (pnl_item1, pnl_item2,  periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllTotalLoanBalanceValueMMYY[period] =float(pnl_item1[period])
+    for i, period in enumerate(periods2) :
+      AllTotalLoanBalanceValueMTH[period] = float(pnl_item2[period]) 
+    return AllTotalLoanBalanceValueMMYY, AllTotalLoanBalanceValueMTH    
+
+TotalLoanBalanceValue (AllShortTermNotesMMYY, AllShortTermNotesMTH)
+#print(TotalLoanBalanceValueMMYY, TotalLoanBalanceValueMTH)
+
+#CreditorHealthScore
+#read in invoices
+#invoice weighted by quadrant/ score/ payment days?  
+
+
+#DebtorHealthScore
+#read in invoices  
+#invoice weighted by quadrant/ score/ payment days?  
+
+
+#TotalRevenueValue
+#SalesMMYY
+
+def TotalRevenueValue (pnl_item1, pnl_item2,  periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllTotalRevenueValueMMYY[period] =float(pnl_item1[period])
+    for i, period in enumerate(periods2) :
+      AllTotalRevenueValueMTH[period] = float(pnl_item2[period]) 
+    return AllTotalRevenueValueMMYY, AllTotalRevenueValueMTH    
+
+TotalRevenueValue (AllSalesValueMMYY, AllSalesValueMTH)
+
+#print(TotalRevenueValueMMYY, TotalRevenueValueMTH)
+
+
+#Creditor30DaysValue
+#read in invoices
+#creditors value flow in to 30days/ stock of <30 days
+
+#Creditor60DaysValue
+#creditors value flow in to 60days/ stock of 30<=day <60 days
+
+#Creditor90DaysValue
+#creditors value flow in to 90days/ stock of 60<=day <90 days
+
+#Creditor120OlderDaysValue
+#creditors value flow in to 120days/ stock of 90<=day <120 days
+
+
+#Creditor30DaysUnits
+#creditors unit flow in to 30days/ stock of <30 days
+
+#Creditor60DaysUnits
+#creditors unit flow in to 60days/ stock of 30<=day <60 days
+
+#Creditor90DaysUnits
+#creditors unit flow in to 90days/ stock of 60<=day <90 days
+
+#CreditorOlderDaysUnits
+#creditors unit flow in to 120days/ stock of 90<=day <120 days
+
+
+#Debtor30DaysValue
+#debtors value flow in to 30days/ stock of <30 days
+
+#Debtor60DaysValue
+#debtors value flow in to 60days/ stock of 30<=day <60 days
+
+#Debtor90DaysValue
+#debtors value flow in to 90days/ stock of 60<=day <90 days
+
+#Debtor120OlderDaysValue
+#debtors value flow in to 120days/ stock of 90<=day <120 days
+
+
+#Debtor30DaysUnits
+#debtors unit flow in to 30days/ stock of <30 days
+
+#Debtor60DaysUnits
+#debtors unit flow in to 60days/ stock of 30<=day <60 days
+
+#Debtor90DaysUnits
+#debtors unit flow in to 90days/ stock of 60<=day <90 days
+
+#DebtorOlderDaysUnits
+#debtors unit flow in to 120days/ stock of 90<=day <120 days
+
+```
+
+```{python}
+#print(AllInterestExpenseShort_termMMYY, AllInterestExpenseLong_termMMYY, AllShortTermNotesMMYY, AllLongTermNotesMMYY, AllInterestExpenseShort_termMTH, AllInterestExpenseLong_termMTH, AllShortTermNotesMTH, AllLongTermNotesMTH)
+
+#print(AllInterestExpenseShort_termMMYY, AllInterestExpenseLong_termMMYY, AllShortTermNotesMMYY, AllLongTermNotesMMYY)
+print(AllShortTermNotesMMYY, AllShortTermNotesMTH)
+```
+
+```{python}
+#GrossProfitMargin
+#duplicate
+
+#NetProfitMargin
+#duplicate
+
+#AdjustedBreakEvenSalesValue
+#to be solved in numpy
+
+
+#BlendedShortTermInterestRate
+#(InterestExpenseShort_termMMYY + InterestExpenseLong_termMMYY) *12 / (ShortTermNotesMMYY + LongTermNotesMMYY)
+
+AllBlendedTermInterestRateMMYY =  {}
+AllChangeInInventoryToChangeInSalesMMYY =  {}
+AllClosingCashBalanceValueMMYY = {}
+AllHighDividendReleaseRatioMMYY = {}
+AllLargeVATBillToCapitalRatioMMYY = {}
+AllLoansToSalesRatioMMYY = {}
+
+AllLoansToSalesRatioMTH = {}
+AllLargeVATBillToCapitalRatioMTH = {}
+AllHighDividendReleaseRatioMTH = {}
+AllClosingCashBalanceValueMTH = {}
+AllChangeInInventoryToChangeInSalesMTH = {}
+AllBlendedTermInterestRateMTH = {}
+
+
+def BlendedTermInterestRate(pnl_item1, pnl_item2, bs_item1, bs_item2, pnl_item3, pnl_item4, bs_item3, bs_item4, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllBlendedTermInterestRateMMYY[period] = (float(pnl_item1[period]) + float(pnl_item2[period])) * 12 / (float(bs_item1[period]) + float(bs_item2[period]))
+    for i, period in enumerate(periods2) : 
+      AllBlendedTermInterestRateMTH[period] = (float(pnl_item3[period]) + float(pnl_item4[period])) * 12 / (float(bs_item3[period]) + float(bs_item4[period]))
+    return AllBlendedTermInterestRateMMYY, AllBlendedTermInterestRateMTH
+
+BlendedTermInterestRate(AllInterestExpenseShort_termMMYY, AllInterestExpenseLong_termMMYY, AllShortTermNotesMMYY, AllLongTermNotesMMYY, AllInterestExpenseShort_termMTH, AllInterestExpenseLong_termMTH, AllShortTermNotesMTH, AllLongTermNotesMTH)
+#print(BlendedTermInterestRateMMYY, BlendedTermInterestRateMTH)
+
+
+#BreakEvenSalesValue
+#to be solved in numpy
+
+#CashflowChangeValue
+#load/ build cashflow csv
+
+
+#ChangeInInventoryToChangeInSales
+#(InventoryMMYY() -  InventoryMMYY(-1)) / SalesMMYY() - SalesMMYY(-1) 
+
+
+
+def ChangeInInventoryToChangeInSales(pnl_item1,  bs_item1, pnl_item2, bs_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for p, period in enumerate(periods1) :
+      if p == 0 :
+        AllChangeInInventoryToChangeInSalesMMYY[period] = 0
+      elif (float(pnl_item1[period]) - float(pnl_item1[last_period])) == 0 :
+        AllChangeInInventoryToChangeInSalesMMYY[period] = 0
+      else :  
+        AllChangeInInventoryToChangeInSalesMMYY[period] = (float(bs_item1[period]) - float(bs_item1[last_period])) / (float(pnl_item1[period]) - float(pnl_item1[last_period]))
+      last_period = period
+    for p, period in enumerate(periods2) : 
+      if p == 0 :
+        AllChangeInInventoryToChangeInSalesMTH[last_period] = 0  
+      elif (float(pnl_item2[period]) - float(pnl_item2[last_period])) == 0 :   
+        AllChangeInInventoryToChangeInSalesMTH[period] = 0
+      else :
+        AllChangeInInventoryToChangeInSalesMTH[period] = (float(bs_item2[period]) - float(bs_item2[last_period]))  / (float(pnl_item2[period]) - float(pnl_item2[last_period]))
+      last_period = period   
+    return AllChangeInInventoryToChangeInSalesMMYY, AllChangeInInventoryToChangeInSalesMTH
+
+ChangeInInventoryToChangeInSales (AllInventoryMMYY, AllSalesMMYY, AllInventoryMTH, AllSalesMTH)
+
+#print(AllChangeInInventoryToChangeInSalesMMYY, AllChangeInInventoryToChangeInSalesMTH)
+
+
+
+#CashMMYY
+
+def ClosingCashBalanceValue (bs_item1, bs_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllClosingCashBalanceValueMMYY[period] =float(bs_item1[period])
+    for i, period in enumerate(periods2) :
+      AllClosingCashBalanceValueMTH[period] = float(bs_item2[period]) 
+    return AllClosingCashBalanceValueMMYY, AllClosingCashBalanceValueMTH    
+
+ClosingCashBalanceValue (AllCashMMYY, AllCashMTH)
+
+#print(ClosingCashBalanceValueMMYY, ClosingCashBalanceValueMTH )
+
+
+
+#CollectionsEfficiency
+#load invoice data
+#days to collect?  -> rollrate 30 to 120
+
+#CurrentRatio
+#duplicate
+
+#CustomerConcentration
+#read in invoices
+
+
+#DebtToEquityRatio
+#duplicate
+
+#DebtorDaysChangeValue
+#read in invoices
+
+#DebtorDaysToCreditorDaysChange
+#read in invoices
+
+
+#FundingGapValue
+#load invoice data
+#av of past 6 months(InventorMMYY/ SalesMMY + mmult(length of balance debtor days, balance in 0.5sales day band) ) * (in_month (SalesMMYY)) 
+# in numpy
+
+
+#HasDirectorBankcrupcy
+#read in commercial data
+
+#HasDirectorCCJ
+#read in commercial data
+
+
+#HasDirectorChange
+#read in commercial data
+
+#HasDirectorDisqualified   
+#read in commercial data
+
+#HasDirectorWithNewBusiness
+#read in commercial data
+
+
+#HasSustainableProfit
+#GrossMarginPct>0.1 and < 1.3 ROTA <1.5 
+# in numpy
+
+#HighDividendRelease
+#(DividendsPaidMMYY/ TotalCapitalMMYY)
+
+
+
+def HighDividendReleaseRatio(bs_item1, bs_item2, bs_item3, bs_item4,periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllHighDividendReleaseRatioMMYY[period] = (-1) * float(bs_item1[period]) / float(bs_item2[period])
+    for i, period in enumerate(periods2) :
+      AllHighDividendReleaseRatioMTH[period] = (-1) * float(bs_item3[period]) / float(bs_item4[period]) 
+    return AllHighDividendReleaseRatioMMYY, AllHighDividendReleaseRatioMTH    
+
+HighDividendReleaseRatio(AllDividendsPaidMMYY, AllTotalCapitalMMYY, AllDividendsPaidMTH, AllTotalCapitalMTH)
+
+#print(HighDividendReleaseRatioMMYY, HighDividendReleaseRatioMTH )
+
+
+#LargeDirectorLoanInValue
+#dk
+
+
+#LargeDirectorLoanOutValue
+#dk
+
+#LargeVATBillToCapitalRatio
+#TaxesIncurredMMYY/ TotalCapitalMMYY
+
+
+def LargeVATBillToCapitalRatio(bs_item1, bs_item2, bs_item3, bs_item4,periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllLargeVATBillToCapitalRatioMMYY[period] = float(bs_item1[period]) / float(bs_item2[period])
+    for i, period in enumerate(periods2) :
+      AllLargeVATBillToCapitalRatioMTH[period] = float(bs_item3[period]) / float(bs_item4[period]) 
+    return AllLargeVATBillToCapitalRatioMMYY, AllLargeVATBillToCapitalRatioMTH    
+
+LargeVATBillToCapitalRatio(AllTaxesIncurredMMYY, AllTotalCapitalMMYY, AllTaxesIncurredMTH, AllTotalCapitalMTH)
+
+#print(LargeVATBillToCapitalRatioMMYY, LargeVATBillToCapitalRatioMTH )
+
+
+#LoanOutstandingLTVRatio
+
+AllLoanOutstandingLTVRatioMMYY = {}
+AllLoanOutstandingLTVRatioMTH = {}
+
+def LoanOutstandingLTVRatio() :
+    for company in range(num_companies) :
+       LoanOutstandingLTVRatioMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), [0]* len(first_rowMMYY)))
+       LoanOutstandingLTVRatioMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), [0]* len(first_rowMMYY) ))
+       AllLoanOutstandingLTVRatioMMYY.update(LoanOutstandingLTVRatioMMYY)
+       AllLoanOutstandingLTVRatioMTH.update(LoanOutstandingLTVRatioMTH)  
+    return AllLoanOutstandingLTVRatioMMYY, AllLoanOutstandingLTVRatioMTH
+    
+LoanOutstandingLTVRatio()
+
+print(AllLoanOutstandingLTVRatioMMYY)
+
+
+#LoansToSalesRatio
+#populate LongTermNotes on BS
+#(ShortTermNotes + longTermNotes) / SalesMMYY
+
+
+def LoansToSalesRatio(bs_item1, bs_item2, pnl_item1, bs_item3, bs_item4, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllLoansToSalesRatioMMYY[period] = (float(bs_item1[period]) + float(bs_item2[period])) / float(pnl_item1[period])
+    for i, period in enumerate(periods2) :
+      AllLoansToSalesRatioMTH[period] = (float(bs_item3[period]) + float(bs_item4[period])) / float(pnl_item2[period]) 
+    return AllLoansToSalesRatioMMYY, AllLoansToSalesRatioMTH    
+
+LoansToSalesRatio(AllShortTermNotesMMYY, AllLongTermNotesMMYY, AllSalesMMYY, AllShortTermNotesMTH, AllShortTermNotesMTH, AllSalesMTH)
+
+#print(LoansToSalesRatioMMYY, LoansToSalesRatioMTH )
+
+
+
+#LongSourceToShortUseRatio
+#read/build in Cashflow
+
+
+#LongSourceValue
+#read/build in Cashflow
+
+
+```
+
+```{python}
+print(AllClosingCashBalanceValueMMYY, AllClosingCashBalanceValueMTH )
+```
+
+```{python}
+
+#LongSourcetoLongUseFunds
+#build/ load cashflow
+
+
+#LongUseValue
+#build/ load cashflow
+
+
+#MLHighRiskSector
+#user defined
+
+#MarginChangeValue
+#calc in numpy
+
+
+#NetCashFlowValue
+#build/ load cashflow
+
+
+#NetWorthValue
+
+AllNetWorthValueMMYY = {}
+AllPayRollToSalesRatioMMYY = {}
+AllRentToSalesRatioMMYY = {}
+AllStockDaysValueMMYY  = {}
+AllVolitileEarningsValueMMYY =  {}
+AllWorkingCapitaltoSalesRatioMMYY = {}
+AllSalesGrowthRateMMYY = {}
+
+AllSalesGrowthRateMTH = {}
+AllWorkingCapitaltoSalesRatioMTH = {}
+AllVolitileEarningsValueMTH = {}
+AllStockDaysValueMTH = {}
+AllRentToSalesRatioMTH = {}
+AllPayRollToSalesRatioMTH = {}
+AllNetWorthValueMTH = {}
+
+def NetWorthValue (bs_item1, bs_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllNetWorthValueMMYY[period] =float(bs_item1[period])
+    for i, period in enumerate(periods2) :
+      AllNetWorthValueMTH[period] = float(bs_item2[period]) 
+    return AllNetWorthValueMMYY, AllNetWorthValueMTH    
+
+NetWorthValue (AllNetWorthMMYY, AllNetWorthMTH)
+
+#print(NetWorthValueMMYY, NetWorthValueMTH )
+
+
+#NewDebtEquityToStockDebtEquity
+#delta new debt equity (net flow? flow-in - flow-out) vs delta stock debt equity.  saw edge
+#cal calculate numpy
+
+#NonOperationalAssetsValue
+#dk
+
+
+#OffUsLendingRate
+# new lender descriptor
+
+#OffUsLendingValue
+# new lender descriptor
+
+#OpeningCashBalanceValue
+#duplicate CashMMYY
+
+
+#OverseasCreditorsValueRatio
+# load invoices and currency 
+
+#PBITChangeValue
+#calculate in numpy
+
+#PayRollToSalesRatio
+
+
+def PayRollToSalesRatio (pnl_item1, pnl_item2, pnl_item3, pnl_item4, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllPayRollToSalesRatioMMYY[period] =float(pnl_item1[period]) / float(pnl_item2[period])
+    for i, period in enumerate(periods2) :
+      AllPayRollToSalesRatioMTH[period] = float(pnl_item3[period]) / float(pnl_item4[period]) 
+    return AllPayRollToSalesRatioMMYY, AllPayRollToSalesRatioMTH    
+
+PayRollToSalesRatio (AllPayrollBurdenMMYY, AllSalesMMYY, AllPayrollBurdenMTH, AllSalesMTH)
+
+#print(PayRollToSalesRatioMMYY, PayRollToSalesRatioMTH)
+
+#ROCEChangeValue
+# cal in numpy
+
+#ROTAChangeValue
+#calc in numpy
+
+
+#RegionalEconomyIndex
+#read in economics data (experian commercial or ONS screen scrap?)
+
+
+#RentToSalesRatio
+
+
+def RentToSalesRatio (pnl_item1, pnl_item2, pnl_item3, pnl_item4, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      if float(pnl_item2[period]) != 0 :
+        AllRentToSalesRatioMMYY[period] = float(pnl_item1[period]) / float(pnl_item2[period])
+      else :
+        AllRentToSalesRatioMMYY[period] = 0
+    for i, period in enumerate(periods2) :
+      if float(pnl_item4[period]) != 0 :   
+        AllRentToSalesRatioMTH[period] = float(pnl_item3[period]) / float(pnl_item4[period]) 
+      else :
+        AllRentToSalesRatioMTH[period]
+    return AllRentToSalesRatioMMYY, AllRentToSalesRatioMTH    
+
+RentToSalesRatio (AllRentMMYY, AllSalesMMYY, AllRentMTH, AllSalesMTH)
+
+#print(RentToSalesRatioMMYY, RentToSalesRatioMTH)
+
+
+#RiskMismatchPrice
+#load commercial credit data
+
+
+AllRiskMismatchPriceMMYY = {}
+AllRiskMismatchPriceMTH = {}
+
+def RiskMismatchPrice() :
+    for company in range(num_companies) :
+       RiskMismatchPriceMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), [0]* len(first_rowMMYY)))
+       RiskMismatchPriceMTH = dict( zip(zip([company] * len(first_rowMTH), first_rowMTH), [0]* len(first_rowMMYY) ))
+       AllRiskMismatchPriceMMYY.update(RiskMismatchPriceMMYY)
+       AllRiskMismatchPriceMTH.update(RiskMismatchPriceMTH)  
+    return AllRiskMismatchPriceMMYY, AllRiskMismatchPriceMTH
+    
+RiskMismatchPrice()
+
+print(AllRiskMismatchPriceMMYY)
+
+
+#ShortSourceShortUseVsCurrentAssetsCurrentLiabilities
+#cal in numpy
+#dependency on short use
+#dependency on CF
+
+#ShortSourceValue
+#dependency on CF
+
+#ShortUseValue
+#dependency on CF
+
+#StockDays
+
+
+
+def StockDaysValue (bs_item1, pnl_item1,  bs_item2, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH, days_in_month = 30) :
+    for i, period in enumerate(periods1) :
+        if float(pnl_item1[period]) != 0 :
+          AllStockDaysValueMMYY[period] = days_in_month * float(bs_item1[period]) / float(pnl_item1[period])
+        else :
+          AllStockDaysValueMMYY[period] = 0  
+    for i, period in enumerate(periods2) :
+        if float(pnl_item2[period]) != 0 :
+          AllStockDaysValueMTH[period] = days_in_month * float(bs_item2[period]) / float(pnl_item2[period]) 
+        else :
+          AllStockDaysValueMTH[period] = 0  
+    return AllStockDaysValueMMYY, AllStockDaysValueMTH    
+
+StockDaysValue (AllInventoryMMYY, AllTotalCostofSalesMMYY, AllInventoryMTH, AllTotalCostofSalesMTH)
+
+#print(StockDaysValueMMYY, StockDaysValueMTH)
+
+#SupplierConcentration
+#need to load invoices
+
+#TotalAssetsValue
+# duplicate
+
+#TotalCapitalValue
+#duplcate
+
+
+#TotalExpenseGeneralAndAdministrativeValue
+# already available, source field
+
+#TotalExpenseSalesAndMarketingValue
+# already available, source field
+
+#TotalExpensesOther
+# already available, source field
+
+#TotalLiabilitiesAndCapitalValue
+# already available, source field
+
+#TotalLiabilitiesValue
+# already available, source field
+
+
+#VolitileEarnings
+
+
+def VolitileEarningsValue(bs_item1,  bs_item2, bs_item3, bs_item4, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for p, period in enumerate(periods1) :
+      if p == 0 :
+        AllVolitileEarningsValueMMYY[period] = 0
+      elif float(bs_item2[last_period]) == 0 :
+        AllVolitileEarningsValueMMYY[period] = 0
+      else :  
+        AllVolitileEarningsValueMMYY[period] = float(bs_item1[period]) / float(bs_item2[last_period])
+      last_period = period
+    for p, period in enumerate(periods2) :
+      if p == 0 :
+        AllVolitileEarningsValueMTH[period] = 0  
+      elif float(bs_item4[last_period]) == 0 :   
+        AllVolitileEarningsValueMTH[period] = 0
+      else :
+        AllVolitileEarningsValueMTH[period] = float(bs_item3[period])  / float(bs_item4[last_period])
+      last_period = period  
+    return AllVolitileEarningsValueMMYY, AllVolitileEarningsValueMTH
+
+VolitileEarningsValue (AllEarningsMMYY, AllTotalCapitalMMYY, AllEarningsMTH, AllTotalCapitalMTH)
+
+#print(VolitileEarningsValueMMYY, VolitileEarningsValueMTH)
+
+
+#WorkingCapitaltoSalesRatio
+#(current assets - current liabilities)/ sales
+
+
+
+def WorkingCapitaltoSalesRatio (bs_item1, bs_item2, bs_item3, bs_item4, bs_item5, bs_item6, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for i, period in enumerate(periods1) :
+      AllWorkingCapitaltoSalesRatioMMYY[period] =(float(bs_item1[period]) - float(bs_item2[period])) / float(bs_item3[period])
+    for i, period in enumerate(periods2) :
+      AllWorkingCapitaltoSalesRatioMTH[period] = (float(bs_item4[period]) - float(bs_item5[period])) / float(bs_item6[period]) 
+    return AllWorkingCapitaltoSalesRatioMMYY, AllWorkingCapitaltoSalesRatioMTH    
+
+WorkingCapitaltoSalesRatio (AllTotalShortTermAssetsMMYY, AllSubtotalShortTermLiabilitiesMMYY, AllSalesMMYY, AllTotalShortTermAssetsMTH, AllSubtotalShortTermLiabilitiesMTH, AllSalesMTH)
+
+#print(WorkingCapitaltoSalesRatioMMYY, WorkingCapitaltoSalesRatioMTH)
+
+
+
+#SalesGrowthRate
+
+
+
+def SalesGrowthRate(pnl_item1, pnl_item2, periods1=CompanyMMYY, periods2=CompanyMTH) :
+    for p, period in enumerate(periods1) :
+      if p == 0 :
+        AllSalesGrowthRateMMYY[period] = 0
+      elif float(pnl_item1[last_period]) == 0 :
+        AllSalesGrowthRateMMYY[period] = 0
+      else :  
+        AllSalesGrowthRateMMYY[period] = float(pnl_item1[period]) / float(pnl_item1[last_period])
+      last_period = period
+    for i, period in enumerate(periods2) :
+      if i == 0 :
+        AllSalesGrowthRateMTH[period] = 0  
+      elif float(pnl_item2[last_period]) == 0 :   
+        AllSalesGrowthRateMTH[period] = 0
+      else :
+        AllSalesGrowthRateMTH[period] = float(pnl_item2[period])  / float(pnl_item2[last_period])
+      last_period = period  
+    return AllSalesGrowthRateMMYY, AllSalesGrowthRateMTH
+
+SalesGrowthRate(AllSalesMMYY, AllSalesMTH)
+
+#print(AllSalesGrowthRateMMYY, AllSalesGrowthRateMTH)
+
+
+
+#CreatedDate
+#todays date?
+#add at point of writing out
+
+
+#TotalCurrentAssetsValue
+# already available, source field
+#TotalCurrentLiabilitiesValue
+# already available, source field
+#TotalEquityValue
+# already available, source field
+#LongTermLiabilitiesValue
+# already available, source field
+#OperatingExpensesValue
+# already available, source field
+```
+
+```{python}
+import numpy as np
+
+AllTotalCurrentAssetsValueMMYY_list = list(dict. items(AllTotalCurrentAssetsValueMMYY)) 
+AllTotalCurrentAssetsValueMMYY_array = np.array(AllTotalCurrentAssetsValueMMYY_list)[:,1]
+print(AllTotalCurrentAssetsValueMMYY_array)
+
+```
+
+```{python}
+AllSalesValueMMYY_list = list(dict. items(AllSalesValueMMYY))
+AllSalesValueMMYY_array = np.array(AllSalesValueMMYY_list)[:,1]
+AllDirectCostofSalesValueMMYY_list = list(dict. items(AllDirectCostofSalesValueMMYY))
+AllDirectCostofSalesValueMMYY_array = np.array(AllDirectCostofSalesValueMMYY_list)[:,1]
+AllTotalCurrentAssetsValueMMYY_list = list(dict. items(AllTotalCurrentAssetsValueMMYY)) 
+AllTotalCurrentAssetsValueMMYY_array = np.array(AllTotalCurrentAssetsValueMMYY_list)[:,1]
+AllTotalCurrentLiabilitiesValueMMYY_list = list(dict. items(AllTotalCurrentLiabilitiesValueMMYY))
+AllTotalCurrentLiabilitiesValueMMYY_array = np.array(AllTotalCurrentLiabilitiesValueMMYY_list)[:,1]
+AllTotalEquityValueMMYY_list = list(dict. items(AllTotalEquityValueMMYY ))
+AllTotalEquityValueMMYY_array = np.array(AllTotalEquityValueMMYY_list)[:,1]
+AllLongTermLiabilitiesValueMMYY_list = list(dict. items(AllLongTermLiabilitiesValueMMYY))
+AllLongTermLiabilitiesValueMMYY_array = np.array(AllLongTermLiabilitiesValueMMYY_list)[:,1]
+AllOperatingExpensesValueMMYY_list = list(dict. items(AllOperatingExpensesValueMMYY ))
+AllOperatingExpensesValueMMYY_array = np.array(AllOperatingExpensesValueMMYY_list)[:,1]
+
+
+AllTotalNetAssetsValueMMYY_list = list(dict. items(AllTotalNetAssetsValueMMYY))
+AllTotalNetAssetsValueMMYY_array = np.array(AllTotalNetAssetsValueMMYY_list)[:,1]
+AllTotalFixedAssetValueMMYY_list = list(dict. items(AllTotalFixedAssetValueMMYY))
+AllTotalFixedAssetValueMMYY_array = np.array(AllTotalFixedAssetValueMMYY_list)[:,1]
+AllTotalIncomeValueMMYY_list = list(dict. items(AllTotalIncomeValueMMYY ))
+AllTotalIncomeValueMMYY_array = np.array(AllTotalIncomeValueMMYY_list)[:,1]
+AllOtherIncomeValueMMYY_list = list(dict. items(AllOtherIncomeValueMMYY ))
+AllOtherIncomeValueMMYY_array = np.array(AllOtherIncomeValueMMYY_list)[:,1]
+AllOwnersFundsValueMMYY_list = list(dict. items(AllOwnersFundsValueMMYY ))
+AllOwnersFundsValueMMYY_array = np.array(AllOwnersFundsValueMMYY_list)[:,1]
+AllSalesValueMMYY_list = list(dict. items(AllSalesValueMMYY ))
+AllSalesValue_array = np.array(AllSalesValueMMYY_list)[:,1]
+AllOperatingCostsValueMMYY_list = list(dict. items(AllOperatingCostsValueMMYY ))
+AllOperatingCostsValueMMYY_array = np.array(AllOperatingCostsValueMMYY_list)[:,1]
+AllPBITValueMMYY_list = list(dict. items(AllPBITValueMMYY ))
+AllPBITValueMMYY_array = np.array(AllPBITValueMMYY_list)[:,1]
+AllInterestValueMMYY_list = list(dict. items(AllInterestValueMMYY )) 
+AllInterestValueMMYY_array = np.array(AllInterestValueMMYY_list)[:,1]
+AllTaxValueMMYY_list = list(dict. items(AllTaxValueMMYY ))
+AllTaxValueMMYY_array = np.array(AllTaxValueMMYY_list)[:,1]
+
+
+
+AllPATValueMMYY_list = list(dict. items(AllPATValueMMYY ))
+AllPATValueMMYY_array = np.array(AllPATValueMMYY_list)[:,1]
+AllDividendValueMMYY_list = list(dict. items(AllDividendValueMMYY)) 
+AllDividendValueMMYY_array = np.array(AllDividendValueMMYY_list)[:,1]
+AllRetainedEarningsValueMMYY_list = list(dict. items(AllRetainedEarningsValueMMYY)) 
+AllRetainedEarningsValueMMYY_array = np.array(AllRetainedEarningsValueMMYY_list)[:,1]
+AllOrdinaryShareNumberMMYY_list = list(dict. items(AllOrdinaryShareNumberMMYY ))
+AllOrdinaryShareNumberMMYY_array = np.array(AllOrdinaryShareNumberMMYY_list)[:,1]
+AllOrdinarySharePriceValueMMYY_list = list(dict. items(AllOrdinarySharePriceValueMMYY))
+AllOrdinarySharePriceValueMMYY_array = np.array(AllOrdinarySharePriceValueMMYY_list)[:,1]
+AllROIPctMMYY_list = list(dict. items(AllROIPctMMYY ))
+AllROIPctMMYY_array = np.array(AllROIPctMMYY_list)[:,1]
+AllROTAPctMMYY_list = list(dict. items(AllROTAPctMMYY ))
+AllROTAPctMMYY_array = np.array(AllROTAPctMMYY_list)[:,1]
+AllLiquidityCurrentRatioMMYY_list = list(dict. items(AllLiquidityCurrentRatioMMYY)) 
+AllLiquidityCurrentRatioMMYY_array = np.array(AllLiquidityCurrentRatioMMYY_list)[:,1]
+AllLiquidityQuickRatioMMYY_list = list(dict. items(AllLiquidityQuickRatioMMYY))
+AllLiquidityQuickRatioMMYY_array = np.array(AllLiquidityQuickRatioMMYY_list)[:,1]
+AllWorkingCapitalSalesRatioMMYY_list = list(dict. items(AllWorkingCapitalSalesRatioMMYY))
+AllWorkingCapitalSalesRatioMMYY_array = np.array(AllWorkingCapitalSalesRatioMMYY_list)[:,1]
+AllInterestCoverRatioMMYY_list = list(dict. items(AllInterestCoverRatioMMYY ))
+AllInterestCoverRatioMMYY_array = np.array(AllInterestCoverRatioMMYY_list)[:,1]
+
+
+AllDebtToEquityPctMMYY_list = list(dict. items(AllDebtToEquityPctMMYY ))
+AllDebtToEquityPctMMYY_array = np.array(AllDebtToEquityPctMMYY_list)[:,1]
+AllLeverageRatioMMYY_list = list(dict. items(AllLeverageRatioMMYY ))
+AllLeverageRatioMMYY_array = np.array(AllLeverageRatioMMYY_list)[:,1]
+#AllCashflowStatementValueMMYY_list = list(dict. items(AllCashflowStatementValueMMYY))
+#AllCashflowStatementValueMMYY_array = np.array(AllCashflowStatementValueMMYY_list)[:,1]
+#AllSourceUseOfFundsValueMMYY_list = list(dict. items(AllSourceUseOfFundsValueMMYY ))
+#AllSourceUseOfFundsValueMMYY_array = np.array(AllSourceUseOfFundsValueMMYY_list)[:,1]
+#AllOpeningAndClosingCashValueMMYY_list = list(dict. items(AllOpeningAndClosingCashValueMMYY))
+#AllOpeningAndClosingCashValueMMYY_array = np.array(AllOpeningAndClosingCashValueMMYY_list)[:,1]
+#AllLongAndShortAnalysisMMYY_list = list(dict. items(AllLongAndShortAnalysisMMYY))
+#AllLongAndShortAnalysisMMYY_array = np.array(AllLongAndShortAnalysisMMYY_list)[:,1]
+#AllExperianCreditScoreMMYY_list = list(dict. items(AllExperianCreditScoreMMYY ))
+#AllExperianCreditScoreMMYY_array = np.array(AllExperianCreditScoreMMYY_list)[:,1]
+AllTotalIncomeValueMMYY_list = list(dict. items(AllTotalIncomeValueMMYY ))
+AllTotalIncomeValueMMYY_array = np.array(AllTotalIncomeValueMMYY_list)[:,1]
+AllTotalCostofSalesValueMMYY_list = list(dict. items(AllTotalCostofSalesValueMMYY)) 
+AllTotalCostofSalesValueMMYY_array = np.array(AllTotalCostofSalesValueMMYY_list)[:,1]
+AllGrossProfitValueMMYY_list = list(dict. items(AllGrossProfitValueMMYY ))
+AllGrossProfitValueMMYY_array = np.array(AllGrossProfitValueMMYY_list)[:,1]
+#GrossMarginPctMMYY = {}
+AllROEPctMMYY_list = list(dict. items(AllROEPctMMYY))
+AllROEPctMMYY_array = np.array(AllROEPctMMYY_list)[:,1]
+AllROCEPctMMYY_list = list(dict. items(AllROCEPctMMYY))
+AllROCEPctMMYY_array = np.array(AllROCEPctMMYY_list)[:,1]
+
+AllTotalLoanBalanceValueMMYY_list = list(dict. items(AllTotalLoanBalanceValueMMYY))
+AllTotalLoanBalanceValueMMYY_array = np.array(AllTotalLoanBalanceValueMMYY_list)[:,1]
+AllTotalRevenueValueMMYY_list = list(dict. items(AllTotalRevenueValueMMYY ))
+AllTotalRevenueValueMMYY_array = np.array(AllTotalRevenueValueMMYY_list)[:,1]
+
+
+
+
+AllBlendedTermInterestRateMMYY_list = list(dict. items(AllBlendedTermInterestRateMMYY))
+AllBlendedTermInterestRateMMYY_array = np.array(AllBlendedTermInterestRateMMYY_list)[:,1]
+AllChangeInInventoryToChangeInSalesMMYY_list = list(dict. items(AllChangeInInventoryToChangeInSalesMMYY))
+AllChangeInInventoryToChangeInSalesMMYY_array = np.array(AllChangeInInventoryToChangeInSalesMMYY_list)[:,1]
+AllClosingCashBalanceValueMMYY_list = list(dict. items(AllClosingCashBalanceValueMMYY ))
+AllClosingCashBalanceValueMMYY_array = np.array(AllClosingCashBalanceValueMMYY_list)[:,1]
+AllHighDividendReleaseRatioMMYY_list = list(dict. items(AllHighDividendReleaseRatioMMYY ))
+AllHighDividendReleaseRatioMMYY_array = np.array(AllHighDividendReleaseRatioMMYY_list)[:,1]
+AllLargeVATBillToCapitalRatioMMYY_list = list(dict. items(AllLargeVATBillToCapitalRatioMMYY)) 
+AllLargeVATBillToCapitalRatioMMYY_array = np.array(AllLargeVATBillToCapitalRatioMMYY_list)[:,1]
+AllLoansToSalesRatioMMYY_list = list(dict. items(AllLoansToSalesRatioMMYY))
+AllLoansToSalesRatioMMYY_array = np.array(AllLoansToSalesRatioMMYY_list)[:,1]
+
+AllNetWorthValueMMYY_list = list(dict. items(AllNetWorthValueMMYY ))
+AllNetWorthValueMMYY_array = np.array(AllNetWorthValueMMYY_list)[:,1]
+AllPayRollToSalesRatioMMYY_list = list(dict. items(AllPayRollToSalesRatioMMYY)) 
+AllPayRollToSalesRatioMMYY_array = np.array(AllPayRollToSalesRatioMMYY_list)[:,1]
+AllRentToSalesRatioMMYY_list = list(dict. items(AllRentToSalesRatioMMYY ))
+AllRentToSalesRatioMMYY_array = np.array(AllRentToSalesRatioMMYY_list)[:,1]
+AllStockDaysValueMMYY_list = list(dict. items(AllStockDaysValueMMYY)) 
+AllStockDaysValueMMYY_array = np.array(AllStockDaysValueMMYY_list)[:,1]
+AllVolitileEarningsValueMMYY_list = list(dict. items(AllVolitileEarningsValueMMYY ))
+AllVolitileEarningsValueMMYY_array = np.array(AllVolitileEarningsValueMMYY_list)[:,1]
+AllWorkingCapitaltoSalesRatioMMYY_list = list(dict. items(AllWorkingCapitaltoSalesRatioMMYY)) 
+AllWorkingCapitaltoSalesRatioMMYY_array = np.array(AllWorkingCapitaltoSalesRatioMMYY_list)[:,1]
+AllSalesGrowthRateMMYY_list = list(dict. items(AllSalesGrowthRateMMYY ))
+AllSalesGrowthRateMMYY_array = np.array(AllSalesGrowthRateMMYY_list)[:,1]
+
+                                              
+                                              
+Allpnl_array = np.concatenate((AllSalesValueMMYY_array, 
+                               AllDirectCostofSalesValueMMYY_array,
+                               AllTotalCurrentAssetsValueMMYY_array,
+                               AllTotalCurrentLiabilitiesValueMMYY_array,
+                               AllTotalEquityValueMMYY_array,
+                               AllLongTermLiabilitiesValueMMYY_array,
+                               AllOperatingExpensesValueMMYY_array,
+                               AllTotalNetAssetsValueMMYY_array,
+                               AllTotalFixedAssetValueMMYY_array,
+                               AllTotalIncomeValueMMYY_array,
+                               AllOtherIncomeValueMMYY_array,
+                               AllOwnersFundsValueMMYY_array,
+                               AllSalesValue_array,
+                               AllOperatingCostsValueMMYY_array,
+                               AllPBITValueMMYY_array,
+                               AllInterestValueMMYY_array,
+                               AllTaxValueMMYY_array,
+                               AllPATValueMMYY_array,
+                               AllDividendValueMMYY_array,
+                               AllRetainedEarningsValueMMYY_array,
+                               AllOrdinaryShareNumberMMYY_array,
+                               AllOrdinarySharePriceValueMMYY_array,
+                               AllROIPctMMYY_array,
+                               AllROTAPctMMYY_array,
+                               AllLiquidityCurrentRatioMMYY_array,
+                               AllLiquidityQuickRatioMMYY_array,
+                               AllWorkingCapitalSalesRatioMMYY_array,
+                               AllInterestCoverRatioMMYY_array,
+                               AllDebtToEquityPctMMYY_array,
+                               AllLeverageRatioMMYY_array,
+                               AllTotalIncomeValueMMYY_array,
+                               AllTotalCostofSalesValueMMYY_array,
+                               AllGrossProfitValueMMYY_array,
+                               AllROEPctMMYY_array,
+                               AllROCEPctMMYY_array,
+                               AllTotalLoanBalanceValueMMYY_array,
+                               AllTotalRevenueValueMMYY_array,
+                               AllBlendedTermInterestRateMMYY_array ,
+                               AllChangeInInventoryToChangeInSalesMMYY_array , 
+                               AllClosingCashBalanceValueMMYY_array  ,   
+                               AllHighDividendReleaseRatioMMYY_array ,                                             
+                               AllLargeVATBillToCapitalRatioMMYY_array ,                                             
+                               AllLoansToSalesRatioMMYY_array , 
+                               AllNetWorthValueMMYY_array   ,                                           
+                               AllPayRollToSalesRatioMMYY_array,
+                               AllRentToSalesRatioMMYY_array ,                                             
+                               AllStockDaysValueMMYY_array  ,                                            
+                               AllVolitileEarningsValueMMYY_array ,                                             
+                               AllWorkingCapitaltoSalesRatioMMYY_array ,                                             
+                               AllSalesGrowthRateMMYY_array
+                              ), axis = 0)
+                                              
+
+number_metrics = 50
+number_months = 36
+number_companies = 2                                              
+
+                                             
+
+```
+
+```{python}
+#np.shape(Allpnl_array)
+Allpnl_reshape_array = np.reshape(Allpnl_array, (number_metrics , number_companies , number_months))
+print(Allpnl_reshape_array[:3, :, :10])
+#  calculate remaining lines items (bounded by pnl and bs)
+
+
+
+
+```
+
+```{python}
+#np.shape(AllDividendValueMMYY_array)
+AllDividendValueMMYY_reshape_array = np.reshape(AllDividendValueMMYY_array, (number_months, number_companies))
+print(AllDividendValueMMYY_reshape_array[-1, :])
+```
+
+```{python}
+#Alloutput_reshape_array = np.reshape(Allpnl_reshape_array, (number_items*number_months, number_companies))
+
+party_id = np.array([0] * number_months).T
+party_id_reshape= np.reshape(party_id, (number_months,1 ))
+months_list = list(months)
+months_array= np.array(months_list)
+months_reshape= np.reshape(months_array, (number_months,1 ))
+header = ["Party_id", "Data"] + [str("metric_") + str(i) for i in range(1, number_metrics + 1)]
+header_array = np.array(header)
+header_reshape= np.reshape(header_array, (1, 2 + number_metrics))
+first_block = np.concatenate((party_id_reshape, months_reshape, (Allpnl_reshape_array[:,0,:]).T ), axis = 1)
+#np.shape(header_reshape)
+#np.shape(first_block)
+
+Alloutput_reshape_array = np.concatenate( (header_reshape, first_block), axis = 0)          
+for i in range(1, number_companies) :
+    party_id = np.array([i] * number_months).T
+    party_id_reshape= np.reshape(party_id, (number_months,1 ))
+    next_block = np.concatenate((party_id_reshape, months_reshape, (Allpnl_reshape_array[:,i,:]).T ), axis = 1)
+    Alloutput_reshape_array = np.concatenate( (Alloutput_reshape_array, next_block), axis=0)
+
+        
+#np.shape(Alloutput_reshape_array)            
+
+print(Alloutput_reshape_array[:40,: 5])
+
+```
+
+```{python}
+header = ["Party_id", "Data"] + [str("metric_") + str(i) for i in range(1, number_metrics + 1)]
+print(header)
+
+```
+
+```{python}
+import pandas as pd 
+
+
+pd.DataFrame(Alloutput_reshape_array).to_csv("\\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\Alloutput.csv", header=None, index=None)
+
+
+```
+
+```{python}
+metrics = Allpnl_reshape_array[:35, :,  -1]
+np.shape(metrics)
+#print(metrics)
+
+```
+
+```{python}
+type(metrics)
+```
+
+```{python}
+import pandas as pd
+
+path1 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\borse.csv'
+path2 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\thresholdsll.csv'
+path3 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\thresholdslpts.csv'
+path4 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\thresholdsul.csv'
+path5 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\thresholdsupts.csv'
+path6 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\commercial.csv'
+path7 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\ReviewTriggerLevels.csv'
+path8 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\signalnarrativewithinsert.csv'
+path9 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\HighRiskCodes.csv'
+path10 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\BSv2.csv'
+path11 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\actions.csv'
+path12 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\NBA_scorecard.csv'
+
+borse_df = pd.read_csv(path1)
+thresholdsll_df = pd.read_csv(path2)
+thresholdslpts_df = pd.read_csv(path3)
+thresholdsul_df = pd.read_csv(path4)
+thresholdsupts_df = pd.read_csv(path5)
+commercial_df = pd.read_csv(path6)
+review_trigger_levels_df = pd.read_csv(path7)
+signal_narrative_df = pd.read_csv(path8)
+high_risk_codes_df = pd.read_csv(path9)
+BS_df = pd.read_csv(path10)
+actions_df = pd.read_csv(path11)
+NBA_scorecard_df = pd.read_csv(path12)
+
+print(borse_df)
+print(thresholdsll_df)
+print(thresholdslpts_df)
+print(thresholdsul_df)
+print(thresholdsupts_df)
+print(commercial_df)
+print(review_trigger_levels_df)
+print(signal_narrative_df)
+print(high_risk_codes_df)
+print(BS_df)
+print(actions_df)
+print(NBA_scorecard_df)
+
+```
+
+```{python}
+print(BS_df)
+```
+
+```{python}
+HasDirectorBankrupt = dict.fromkeys(company for company in range(number_companies))
+HasDirectorCCJ = dict.fromkeys(company for company in range(number_companies))
+HasDirectorChange = dict.fromkeys(company for company in range(number_companies))
+HasDirectorDisqualified = dict.fromkeys(company for company in range(number_companies))
+HasDirectorNewBusiness = dict.fromkeys(company for company in range(number_companies))
+
+
+#HasDirectorBankrupt = dict( zip(company for company in range(number_companies), [0]* number_companies))
+
+print(HasDirectorBankrupt)
+```
+
+```{python}
+np.shape(commercial_df)
+print(commercial_df)
+```
+
+```{python}
+
+def DirectorBankrupt(df) : 
+    for company in range(number_companies) :
+       HasDirectorBankrupt[company] = 0   
+       if df.iloc[company, : ]["bankcrupt director"] == 1 :
+          HasDirectorBankrupt[company] = 1
+    return HasDirectorBankrupt
+
+def DirectorCCJ(df) : 
+    for company in range(number_companies) :
+       HasDirectorCCJ[company] = 0   
+       if df.iloc[company, : ]["CCJ director"] == 1 :
+          HasDirectorCCJ[company] = 1
+    return HasDirectorCCJ
+
+def DirectorChange(df) : 
+    for company in range(number_companies) :
+       HasDirectorChange[company] = 0   
+       if df.iloc[company, : ]["changed director"] == 1 :
+          HasDirectorChange[company] = 1
+    return HasDirectorChange
+
+def DirectorDisqualified(df) : 
+    for company in range(number_companies) :
+       HasDirectorDisqualified[company] = 0   
+       if df.iloc[company, : ]["disqualified director"] == 1 :
+          HasDirectorDisqualified[company] = 1
+    return HasDirectorDisqualified
+
+
+def DirectorNewBusiness(df) : 
+    for company in range(number_companies) :
+       HasDirectorNewBusiness[company] = 0   
+       if df.iloc[company, : ]["new business director"] == 1 :
+          HasDirectorNewBusiness [company] = 1
+    return HasDirectorNewBusiness
+
+DirectorBankrupt(commercial_df)
+DirectorCCJ(commercial_df)
+DirectorChange(commercial_df)
+DirectorDisqualified(commercial_df)
+DirectorNewBusiness(commercial_df)
+print(HasDirectorNewBusiness)
+
+```
+
+```{python}
+#= np.mean.reduceat(AllPATValueMMYY_array,,np.arange(0,len(Pbit),3))
+
+AllPATValueMMYY_list = list(dict. items(AllPATValueMMYY)) 
+MetricPATValue_array = []
+
+
+for company in range(number_companies) :
+    PATValue0_3 = np.sum(np.array(AllPATValueMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-4:][:, 1])
+    PATValue3_6 = np.sum(np.array(AllPATValueMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-7:-4][:, 1])
+    if PATValue3_6 != 0 :
+        MetricPATValue = (PATValue3_6 - PATValue0_3)/PATValue3_6
+    MetricPATValue_array = np.append(MetricPATValue_array, MetricPATValue)
+    
+#print(PATValue0_3_array)
+#print(PATValue3_6_array)
+#print(MetricPATValue_array)
+
+AllROCEPctMMYY_list = list(dict. items(AllROCEPctMMYY)) 
+MetricROCEChangeValue_array = []
+
+
+for company in range(number_companies) :
+    ROCEPct0_3 = np.sum(np.array(AllROCEPctMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-4:][:, 1])
+    ROCEPct3_6 = np.sum(np.array(AllROCEPctMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-7:-4][:, 1])
+    if PATValue3_6 != 0 :
+        MetricROCEChangeValue = (ROCEPct3_6 - ROCEPct0_3)
+    MetricROCEChangeValue_array = np.append(MetricROCEChangeValue_array, MetricROCEChangeValue)
+    
+#print(ROCEPct0_3)
+#print(ROCEPct3_6)
+#print(MetricROCEChangeValue_array)
+
+
+AllROTAPctMMYY_list = list(dict. items(AllROTAPctMMYY)) 
+MetricROTAChangeValue_array = []
+
+
+for company in range(number_companies) :
+    ROTAPct0_3 = np.sum(np.array(AllROTAPctMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-4:][:, 1])
+    ROTAPct3_6 = np.sum(np.array(AllROTAPctMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-7:-4][:, 1])
+    if PATValue3_6 != 0 :
+        MetricROTAChangeValue = (ROTAPct3_6 - ROTAPct0_3)
+    MetricROTAChangeValue_array = np.append(MetricROTAChangeValue_array, MetricROTAChangeValue)
+    
+#print(ROTAPct0_3)
+#print(ROTAPct3_6)
+#print(MetricROTAChangeValue_array)
+
+
+AllGrossMarginPctMMYY_list = list(dict. items(AllGrossMarginPctMMYY)) 
+HasSustainableProfit_array = []
+
+
+for company in range(number_companies) :
+    GrossMarginPct0_1 = np.sum(np.array(AllGrossMarginPctMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-1:][:, 1])
+    ROTAPct0_1 = np.sum(np.array(AllROTAPctMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-1:][:, 1])
+    HasSustainableProfit = (float(GrossMarginPct0_1) > 0.1 ) and (float(ROTAPct0_1) >= 1.30) and (float(ROTAPct0_1) < 1.50)
+    HasSustainableProfit_array = np.append(HasSustainableProfit_array, HasSustainableProfit)
+    
+#print(GrossMarginPct0_1)
+#print(ROTAPct0_1)
+#print(HasSustainableProfit_array)
+
+
+AllSalesValueMMYY_list = list(dict. items(AllSalesValueMMYY)) 
+SalesGrowthRate_array = []
+
+
+for company in range(number_companies) :
+    Sales0_3 = np.sum(np.array(AllSalesValueMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-4:][:, 1])
+    Sales1_4 = np.sum(np.array(AllSalesValueMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-5:-1][:, 1])
+    SalesGrowthRate = float(Sales0_3) / float(Sales1_4)
+    SalesGrowthRate_array = np.append(SalesGrowthRate_array, SalesGrowthRate)
+
+#print(AllSalesValueMMYY_list)    
+#print(Sales0_3)
+#print(Sales1_4)
+#print(SalesGrowthRate_array)
+
+AllLiquidityCurrentRatioMMYY_list = list(dict. items(AllLiquidityCurrentRatioMMYY)) 
+CurrentRatio_array = []
+
+
+for company in range(number_companies) :
+    CurrentRatio = np.sum(np.array(AllLiquidityCurrentRatioMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-1:][:, 1])
+    CurrentRatio_array = np.append(CurrentRatio_array, CurrentRatio)
+
+    
+#print(CurrentRatio)
+#print(CurrentRatio_array)
+#def PbitChangeValue()
+
+
+AllWorkingCapitalSalesRatioMMYY_array_list = list(dict. items(AllWorkingCapitalSalesRatioMMYY)) 
+WorkingCapitalSalesRatio_array = []
+
+
+for company in range(number_companies) :
+    WorkingCapitalSalesRatio = np.sum(np.array(AllWorkingCapitalSalesRatioMMYY_array_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-1:][:, 1])
+    WorkingCapitalSalesRatio_array = np.append(WorkingCapitalSalesRatio_array, WorkingCapitalSalesRatio)
+
+    
+#print(WorkingCapitalSalesRatio)
+#print(WorkingCapitalSalesRatio_array)
+
+#AllPbitChangeValue
+
+
+AllDebtToEquityPctMMYY_array_list = list(dict. items(AllDebtToEquityPctMMYY)) 
+DebtToEquityRatio_array = []
+
+for company in range(number_companies) :
+    DebtToEquityRatio = np.sum(np.array(AllDebtToEquityPctMMYY_array_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-1:][:, 1])
+    DebtToEquityRatio_array = np.append(DebtToEquityRatio_array, DebtToEquityRatio)
+
+#print(DebtToEquityRatio)
+#print(DebtToEquityRatio_array)
+
+AllGrossMarginPctMMYY_list = list(dict. items(AllGrossMarginPctMMYY)) 
+MarginChangeValue_array = []
+
+for company in range(number_companies) :
+    Margin0 = np.sum(np.array(AllGrossMarginPctMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-1:][:, 1])
+    Margin1 = np.sum(np.array(AllGrossMarginPctMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-2:-1][:, 1])
+    MarginChangeValue = float(Margin0)-float(Margin1)
+    MarginChangeValue_array = np.append(MarginChangeValue_array, MarginChangeValue)
+    
+    
+#print(AllGrossMarginPctMMYY_list)  
+#print(MarginChangeValue_array)
+
+
+
+AllChangeInInventoryToChangeInSalesMMYY_list = list(dict. items(AllChangeInInventoryToChangeInSalesMMYY)) 
+ChangeInInventoryToChangeInSales_array = []
+
+for company in range(number_companies) :
+    ChangeInInventoryToChangeInSales = np.sum(np.array(AllChangeInInventoryToChangeInSalesMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-1:][:, 1])
+    ChangeInInventoryToChangeInSales_array = np.append(ChangeInInventoryToChangeInSales_array, ChangeInInventoryToChangeInSales)
+    
+#print(ChangeInInventoryToChangeInSales)  
+#print(ChangeInInventoryToChangeInSales_array)
+
+
+
+AllLoansToSalesRatioMMYY_list = list(dict. items(AllLoansToSalesRatioMMYY)) 
+AllPayRollToSalesRatioMMYY_list = list(dict. items(AllPayRollToSalesRatioMMYY)) 
+AllRentToSalesRatioMMYY_list = list(dict. items(AllRentToSalesRatioMMYY)) 
+
+AllLoansToSalesRatio_array = []
+AllPayRollToSalesRatio_array = []
+AllRentToSalesRatio_array = []
+
+for company in range(number_companies) :
+    AllLoansToSalesRatio = np.sum(np.array(AllLoansToSalesRatioMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-1:][:, 1])
+    AllPayRollToSalesRatio = np.sum(np.array(AllPayRollToSalesRatioMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-1:][:, 1])
+    AllRentToSalesRatio = np.sum(np.array(AllRentToSalesRatioMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-1:][:, 1])
+
+    AllLoansToSalesRatio_array = np.append(AllLoansToSalesRatio_array, AllLoansToSalesRatio)
+    AllPayRollToSalesRatio_array = np.append(AllPayRollToSalesRatio_array, AllPayRollToSalesRatio)
+    AllRentToSalesRatio_array = np.append(AllRentToSalesRatio_array, AllRentToSalesRatio)
+    
+ 
+#print(AllLoansToSalesRatio)  
+#print(AllLoansToSalesRatio_array)
+
+AllHighDividendReleaseRatioMMYY_list = list(dict. items(AllHighDividendReleaseRatioMMYY)) 
+HighDividendReleaseRatio_array = []
+
+for company in range(number_companies) :
+    HighDividendReleaseRatio = np.sum(np.array(AllHighDividendReleaseRatioMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-1:][:, 1])
+    HighDividendReleaseRatio_array = np.append(HighDividendReleaseRatio_array, HighDividendReleaseRatio)
+    
+#print(HighDividendReleaseRatio)  
+#print(HighDividendReleaseRatio_array)
+
+AllLargeVATBillToCapitalRatioMMYY_list = list(dict. items(AllLargeVATBillToCapitalRatioMMYY)) 
+LargeVATBillToCapitalRatio_array = []
+
+for company in range(number_companies) :
+    LargeVATBillToCapitalRatio = np.sum(np.array(AllLargeVATBillToCapitalRatioMMYY_list)[np.arange(number_months * company, number_months * (company + 1), 1).tolist()][-1:][:, 1])
+    LargeVATBillToCapitalRatio_array = np.append(LargeVATBillToCapitalRatio_array, LargeVATBillToCapitalRatio)
+    
+print(LargeVATBillToCapitalRatio)  
+print(LargeVATBillToCapitalRatio_array)
+
+
+
+```
+
+```{python}
+type(GrossMarginPct0_1)
+```
+
+```{python}
+#print(AllLiquidityCurrentRatioMMYY_array)
+```
+
+```{python}
+AllLoanOutstandingLTVRatioMMYY_list = list(dict. items(AllLoanOutstandingLTVRatioMMYY)) 
+MetricLoanOutstandingLTVRatio_array = np.array(AllLoanOutstandingLTVRatioMMYY_list)[[np.arange(number_months - 1 , number_months * number_companies , number_months).tolist(), 1]].T
+print(MetricLoanOutstandingLTVRatio_array)
+MetricLoanOutstandingLTVRatio_array.shape
+
+AllRiskMismatchPriceMMYY_list = list(dict. items(AllRiskMismatchPriceMMYY)) 
+MetricRiskMismatchPrice_array = np.array(AllRiskMismatchPriceMMYY_list)[[np.arange(number_months - 1, number_months * number_companies , number_months).tolist(), 1]].T
+print(MetricRiskMismatchPrice_array)
+MetricRiskMismatchPrice_array.shape
+
+AllVolitileEarningsValueMMYY_list = list(dict. items(AllVolitileEarningsValueMMYY)) 
+MetricVolitileEarningsValue_array = np.array(AllVolitileEarningsValueMMYY_list)[[np.arange(number_months - 1 , number_months * number_companies , number_months).tolist(), 1]].T
+print(MetricVolitileEarningsValue_array)
+MetricVolitileEarningsValue_array.shape
+
+
+```
+
+```{python}
+
+
+CashflowChangeValue_array = [0] * number_companies
+MIHighRiskSector_array = [0] * number_companies
+LongSourcetoLongUseFunds_array = [0] * number_companies
+NewDebtEquityToStockDebtEquity_array = [0] * number_companies
+ShortSourceShortUseVsCurrentAssetsCurrentLiabilities_array = [0] * number_companies
+OverseasCreditorsValueRatio_array = [0] * number_companies
+NonOperationalAssetsValue_array = [0] * number_companies
+DebtorDaysChangeValue_array = [0] * number_companies
+CreditScoreAndNoSecurity_array = [0] * number_companies
+
+
+print(CashflowChangeValue_array)
+```
+
+```{python}
+
+
+
+```
+
+```{python}
+signals_array = np.concatenate((np.array(commercial_df.iloc[:]["disqualified director"]),
+                                np.array(commercial_df.iloc[:]["CCJ director"]),
+                                np.array(commercial_df.iloc[:]["bankcrupt director"]),
+                                CreditScoreAndNoSecurity_array,
+                                MetricLoanOutstandingLTVRatio_array,
+                                np.array(commercial_df.iloc[:]["changed director"]),
+                                MetricRiskMismatchPrice_array,
+                                MetricVolitileEarningsValue_array,
+                                MetricPATValue_array,
+                                CashflowChangeValue_array,
+                                MIHighRiskSector_array,
+                                MetricROCEChangeValue_array,
+                                MetricROTAChangeValue_array,
+                                HasSustainableProfit_array,
+                                SalesGrowthRate_array,
+                                CurrentRatio_array,
+                                WorkingCapitalSalesRatio_array,
+                                DebtToEquityRatio_array,
+                                LongSourcetoLongUseFunds_array,
+                                NewDebtEquityToStockDebtEquity_array,
+                                ShortSourceShortUseVsCurrentAssetsCurrentLiabilities_array,
+                                MarginChangeValue_array,
+                                ChangeInInventoryToChangeInSales_array,
+                                AllLoansToSalesRatio_array,
+                                AllPayRollToSalesRatio_array,
+                                AllRentToSalesRatio_array,
+                                OverseasCreditorsValueRatio_array,
+                                NonOperationalAssetsValue_array,
+                                np.array(commercial_df.iloc[:]["new business director"]),
+                                HighDividendReleaseRatio_array,
+                                supplier_concentration_ratios, 
+                                customer_concentration_ratios,
+                                np.array(commercial_df.iloc[:]["regional economy index"]),
+                                DebtorDaysChangeValue_array,
+                                LargeVATBillToCapitalRatio_array
+                                ), axis = 0)
+
+
+
+
+
+signals_reshape_array = np.reshape(signals_array, (np.shape(signals_array)[0]// 2, 2))
+print(signals_reshape_array)
+    
+    
+```
+
+```{python}
+np.shape(signals_reshape_array)
+```
+
+```{python}
+df = np.array(commercial_df.iloc[:]["disqualified director"])
+print(df)
+```
+
+```{python}
+import pickle
+
+shared = {"Foo":"Bar", "Parrot":"Dead"}
+fp = open("shared.pkl","w")
+pickle.dump(shared, fp)
+two.py
+
+import pickle
+
+fp = open("shared.pkl")
+shared = pickle.load(fp)
+print(shared["Foo"])
+```
+
+```{python}
+from openpyxl.workbook import Workbook
+from openpyxl import load_workbook
+
+wb = load_workbook('regions.xlsx')
+ws = wb.active
+
+cell_range = ws['A1:C1']
+col_c =ws['C']
+col_range = ws['A': 'C']
+
+row_range = ws[1:5]
+
+for row in ws.iter_rows(min_row=1, max_col=3, max_row=2, values_only=True):
+    for cell in row:
+        print(cell)
+
+```
+
+```{python}
+# Import data from .csv file
+
+
+invoice_df = pd.read_csv("\\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\invoicev2.csv")
+
+type(invoice_df)
+```
+
+```{python}
+np.shape(invoice_df)
+invoice_array = np.reshape(invoice_df, np.shape(invoice_df))
+type(invoice_array)
+
+```
+
+```{python}
+print(invoice_df)
+```
+
+```{python}
+unique_companies = np.unique(invoice_df["PartyId"])
+unique_customers = np.unique(invoice_df["CustomerId"])
+customer_concentration_ratio = [] 
+sums = []
+accum_sums = []
+customer_concentration_ratios = []
+last_sum = 0
+for company in unique_companies :
+   company_invoice_df = invoice_df[["GrossValue","CustomerId"]][invoice_df["PartyId"] == company ] 
+   for customer in unique_customers :
+      s = company_invoice_df["GrossValue"][company_invoice_df["CustomerId"] == customer].sum()
+      sums.append(s)
+   sums_rank = pd.Series(sums).rank()
+   rank_2  = list(np.where(sums_rank == len(sums) - 2))[0]
+   customer_concentration_ratio = max(sums / sums[rank_2[0]])
+   customer_concentration_ratios.append(customer_concentration_ratio)
+
+print(customer_concentration_ratios)    
+
+supplier_concentration_ratios = customer_concentration_ratios
+```
+
+```{python}
+DebtorDaysChangeValue_array
+```
+
+```{python}
+SalesandMarketingExpensesMMYY = dict( zip(zip([company] * len(first_rowMMYY), first_rowMMYY), row[1:] ))
+```
+
+```{python}
+signal_narrative_df['description detail']
+```
+
+```{python}
+np.shape(thresholdsll_df)
+type(thresholdsll_df)
+```
+
+```{python}
+thresholds_limits = np.concatenate((thresholdsll_df.iloc[1:,1:], thresholdsul_df.iloc[1:,1:]), axis=0)
+rows, columns = np.shape(thresholds_limits)
+```
+
+```{python}
+threshold_limits_reshaped = np.reshape(thresholds_limits, (2, int(rows / 2), columns))
+
+np.shape(threshold_limits_reshaped)
+```
+
+```{python}
+print(threshold_limits_reshaped)
+```
+
+```{python}
+thresholds_pts = np.concatenate((thresholdslpts_df.iloc[1:,1:], thresholdsupts_df.iloc[1:,1:]), axis=0)
+rows, columns = np.shape(thresholds_pts)
+
+threshold_pts_reshaped = np.reshape(thresholds_pts, (2, int(rows / 2), columns))
+
+np.shape(threshold_pts_reshaped)
+
+print(threshold_pts_reshaped)
+```
+
+```{python}
+type(threshold_pts_reshaped)
+```
+
+```{python}
+review_trigger_levels = np.transpose(np.array(review_trigger_levels_df.iloc[:,1:]))
+print(review_trigger_levels)
+```
+
+```{python}
+metrics = signals_reshape_array
+```
+
+```{python}
+number_limits, number_metrics, number_risks = np.shape(threshold_limits_reshaped)
+
+number_companies = 2
+company = 0
+lower_limit = 0
+upper_limit = 1
+lower_breach = np.zeros((number_metrics, number_risks, number_companies))
+lower_score = np.zeros((number_metrics, number_risks, number_companies))
+upper_breach = np.zeros((number_metrics, number_risks, number_companies))
+upper_score = np.zeros((number_metrics, number_risks, number_companies))
+company_lower_risk_score = np.zeros((number_risks, number_companies))
+for company in range(number_companies) :
+   for risk in range(number_risks) :
+      lower_breach[:, risk, company] = metrics[:, company] > threshold_limits_reshaped[lower_limit, :, risk]
+      lower_score[:, risk, company] =  lower_breach[:, risk, company] * threshold_pts_reshaped[lower_limit, :, risk]  
+      upper_breach[:, risk, company] = metrics[:, company] > threshold_limits_reshaped[upper_limit, :, risk]
+      upper_score[:, risk, company] =  upper_breach[:, risk, company] * threshold_pts_reshaped[upper_limit, :, risk]  
+      final_score = np.maximum(lower_score, upper_score)   
+company_final_risk_score = np.nanmean(final_score, axis=0) 
+print(company_final_risk_score)
+```
+
+```{python}
+risk_profile = np.zeros((number_risks, number_companies))
+for company in range(number_companies) :
+   risk_profile[:, company] = company_final_risk_score[:, company] > review_trigger_levels
+print(risk_profile)    
+```
+
+```{python}
+risk_signals = np.zeros((number_metrics, number_companies))
+for company in range(number_companies) :
+   risk_signals[:, company] = np.matmul(np.nan_to_num(final_score[:,:,company]), np.nan_to_num(np.transpose(company_final_risk_score[:, company]))) > 0
+print(risk_signals)
+
+
+header =  ["Party_id", "ValiDate", "DateCreated", "Description", "DescriptionDetail", "Action", "ActionData", "Weigthing", "Status", "Narrative", "QueueType"]
+block = np.reshape(header, (1, 11))
+for company in range(number_companies) :
+    party_id = []
+    ValidDate=[]
+    DateCreated =[]
+    Description = []
+    DescriptionDetail = []
+    Action = []
+    ActionData = []
+    Weighting = []
+    Status = []
+    Narrative = []
+    QueueType = []
+    count_signals = 0
+    for metric in range(number_metrics) :
+       if risk_signals[metric, company] > 0 :
+          party_id = np.append(party_id, str(company))
+          ValidDate= np.append(ValidDate, ["8/31/2020  12:00:00 AM"])
+          DateCreated = np.append(DateCreated,["8/31/2020  12:00:00 AM"]) 
+          Description = np.append(Description, signal_narrative_df['description detail'][metric])
+          DescriptionDetail = np.append(DescriptionDetail, signal_narrative_df['description'][metric])
+          Action =  np.append(Action, signal_narrative_df['action'][metric]) 
+          ActionData = np.append(ActionData, [" "])
+          Weighting = np.append(Weighting, [" "])
+          Status = np.append(Status, ["Open"])
+          if signal_narrative_df['insert'][metric] == 0 :
+            Narrative = np.append(Narrative, signal_narrative_df['narrative'][metric])
+          else :
+            Narrative = np.append(Narrative, signal_narrative_df['narrative'][metric] + " {} ".format(metrics[metric, company]) +  signal_narrative_df['narrative2'][metric])
+          QueueType = np.append(QueueType, signal_narrative_df['risk'][metric])
+          count_signals += 1  
+       next_block = np.concatenate((party_id, ValidDate, DateCreated, Description, DescriptionDetail, Action, ActionData, Weighting, Status, Narrative, QueueType), axis = 0)  
+       cols = count_signals
+       rows = 11
+       next_block_reshape = np.reshape(next_block, (rows, cols))    
+       next_block_reshape_transpose = next_block_reshape.T
+    block = np.concatenate((block, next_block_reshape_transpose), axis=0)
+
+print(block)                        
+    
+                        
+```
+
+```{python}
+
+pd.DataFrame(block).to_csv("\\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\signals.csv", header=None, index=None)
+
+```
+
+```{python}
+header = [ 
+"Id",
+"PartyId",
+"QueueType",
+"DateCreated",
+"Status",
+"DateClosed"
+]
+
+header_queue = np.reshape(header, (1, len(header)))
+
+
+
+```
+
+```{python}
+block_queue = block[1:,[0, 10, 2]]
+unique_block_queue = np.unique(block_queue, axis=0)
+print(unique_block_queue)
+```
+
+```{python}
+rows, cols = np.shape(unique_block_queue)
+id = np.reshape([i for i in range(rows)], (rows,1)) 
+#print(id)
+status = np.reshape(["New"] * rows, (rows,1)) 
+#print(status)
+dateclosed = np.reshape([""] * rows, (rows,1)) 
+np.shape(id)
+```
+
+```{python}
+block_queue_out = np.concatenate ((header_queue, np.concatenate ((id, unique_block_queue, status, dateclosed), axis= 1)), axis=0)
+print(block_queue_out)
+```
+
+```{python}
+pd.DataFrame(block_queue_out).to_csv("\\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\queuev2.csv", header=None, index=None)
+```
+
+```{python}
+#cashflow
+print(BS_df)
+```
+
+```{python}
+#np.shape(BS_df)
+#type(BS_df)
+BS_array = np.array(BS_df)[:, 1:]
+#BS_assets_key_lines = BS_array[asset_key_lines]
+rows, cols = np.shape(BS_array)
+BS_array_prev = np.c_[np.zeros((rows, 1)), BS_array[:, 0:cols-1]]
+
+#np.shape(BS_array[:, 0:cols-1])
+#np.shape(np.zeros((rows, 1)))
+#np.shape(BS_array[0: cols-1])
+
+BS_movement = (BS_array - BS_array_prev)[:,1:]
+#print(BS_movement)
+
+BS_reshape_movement = np.reshape(BS_movement, (rows// number_companies, number_months-1, number_companies))
+print(BS_reshape_movement)
+```
+
+```{python}
+BS_array = np.array(BS_df)
+BS_assets_key_lines = BS_array[np.isin(BS_array[:,0], Assets_key_lines)][:, 1:]
+
+rows, cols = np.shape(BS_assets_key_lines)
+BS_assets_key_lines_prev = np.c_[np.zeros((rows, 1)), BS_assets_key_lines[:, 0:cols-1]]
+
+#np.shape(BS_array[:, 0:cols-1])
+#np.shape(np.zeros((rows, 1)))
+#np.shape(BS_array[0: cols-1])
+
+BS_assets_movement = (BS_assets_key_lines - BS_assets_key_lines_prev)[:,1:]
+#print(BS_assets_movement)
+
+
+BS_reshape_assets_movement = np.moveaxis(np.reshape(BS_assets_movement, (  number_companies, number_months-1, rows//number_companies)), [0, 2], [2, 0])
+
+#print(BS_assets_key_lines)
+
+BS_positive_assets_movement = abs(BS_reshape_assets_movement) * [BS_reshape_assets_movement >= 0]
+BS_negative_assets_movement = abs(BS_reshape_assets_movement) * [BS_reshape_assets_movement < 0]
+#print(BS_positive_assets_movement)
+#print(BS_negative_assets_movement)
+
+#np.moveaxis(BS_reshape_assets_movement, [0, 1, 2], [2, 0, 1]).shape
+#np.shape(BS_reshape_assets_movement)
+print(BS_reshape_assets_movement)
+```
+
+```{python}
+BS_array = np.array(BS_df)
+BS_liabilities_key_lines = BS_array[np.isin(BS_array[:,0], Liabilities_key_lines)][:, 1:]
+
+rows, cols = np.shape(BS_liabilities_key_lines)
+BS_liabilities_key_lines_prev = np.c_[np.zeros((rows, 1)), BS_liabilities_key_lines[:, 0:cols-1]]
+
+#np.shape(BS_array[:, 0:cols-1])
+#np.shape(np.zeros((rows, 1)))
+#np.shape(BS_array[0: cols-1])
+
+BS_liabilities_movement = (BS_liabilities_key_lines - BS_liabilities_key_lines_prev)[:,1:]
+#print(BS_assets_movement)
+
+
+BS_reshape_liabilities_movement = np.moveaxis(np.reshape(BS_liabilities_movement, (  number_companies, number_months-1, rows//number_companies)), [0, 2], [2, 0])
+print(BS_reshape_liabilities_movement[:,0,0])
+#print(BS_assets_key_lines)
+
+BS_positive_liabilities_movement = abs(BS_reshape_liabilities_movement) * [BS_reshape_liabilities_movement >= 0]
+BS_negative_liabilities_movement = abs(BS_reshape_liabilities_movement) * [BS_reshape_liabilities_movement < 0]
+print(BS_positive_liabilities_movement)
+print(BS_negative_liabilities_movement)
+```
+
+```{python}
+BS_assets = ["Assets",
+"Short-term Assets",
+"Cash",
+"Accounts Receivable",
+"Inventory",
+"Other Short-term Assets",
+"Total Short-term Assets",
+"Long-term Assets",
+"Capital Assets",
+"Accumulated Depreciation",
+"Total Long-term Assets",
+"Total Assets"
+]
+
+
+Assets_key_lines = [
+"Accounts Receivable",
+"Inventory",
+"Other Short-term Assets",
+"Long-term Assets",
+]
+
+
+
+
+type(BS_assets)
+#print(BS_assets)
+```
+
+```{python}
+BS_liabilities = [
+"Liabilities and Capital",
+"Accounts Payable",
+"Short-term Notes",
+"Other Short-term Liabilities",
+"Subtotal Short-term Liabilities",
+"Long-term Liabilities",
+"Total Liabilities",
+"Paid in Capital",
+"Dividends paid",
+"Retained Earnings",
+"Earnings",
+"Total Capital",
+"Total Liabilities and Capital",
+"Net Worth"
+]
+
+Liabilities_key_lines = [
+"Accounts Payable",
+"Short-term Notes",
+"Other Short-term Liabilities",
+"Long-term Liabilities",
+]
+
+
+
+print(BS_liabilities)
+```
+
+```{python}
+Cashflow_lines = [
+"Net Profit",
+"Plus:",
+"Depreciation",
+"Change in Accounts Payable",
+"Current Borrowing (repayment)",
+"Increase (decrease) Other Liabilities",
+"Long-term Borrowing (repayment)",
+"Capital Input",
+"Subtotal",
+"Less:",
+"Change in Accounts Receivable",
+"Change in Inventory",
+"Change in Other Short-term Assets",
+"Capital Expenditure",
+"Dividends",
+"Subtotal",
+"Net Cash Flow",
+"Cash Balance",
+]
+
+type(Cashflow_lines)
+```
+
+```{python}
+
+AllPATValueMMYY_list = list(dict. items(AllPATValueMMYY ))
+AllPATValueMMYY_array = np.array(AllPATValueMMYY_list)[:,1]
+
+AllDepreciationMMYY_list = list(dict. items(AllDepreciationMMYY ))
+AllDepreciationMMYY_array = np.array(AllDepreciationMMYY_list)[:,1]
+
+AllPaidInCapitalMMYY_list = list(dict. items(AllPaidInCapitalMMYY ))
+AllPaidInCapitalMMYY_array = np.array(AllPaidInCapitalMMYY_list)[:,1]
+
+AllDividendValueMMYY_list = list(dict. items(AllDividendValueMMYY ))
+AllDividendValueMMYY_array = np.array(AllDividendValueMMYY_list)[:,1]
+
+AllCashMMYY_list = list(dict. items(AllCashMMYY ))
+AllCashMMYY_array = np.array(AllCashMMYY_list)[:,1]
+
+
+
+
+```
+
+```{python}
+Pnl_and_BS_adj_array = np.concatenate((AllPATValueMMYY_array, AllDepreciationMMYY_array), axis= 0)
+Pnl_and_BS_adj_reshape_array = np.moveaxis(np.reshape(Pnl_and_BS_adj_array, (len(Pnl_and_BS_adj_array) // (number_companies*2), 2, number_companies), order = 'F')[1:,:,:], [0, 1], [1, 0]) 
+
+#print(Pnl_and_BS_adj_reshape_array)
+
+Paidin_cap_reshape_array = np.moveaxis(np.reshape(AllPaidInCapitalMMYY_array, (len(AllPaidInCapitalMMYY_array) // (number_companies), 1, number_companies), order = 'F')[1:,:,:], [0, 1], [1, 0]) 
+
+
+Div_and_Cash_array = np.concatenate((AllDividendValueMMYY_array, AllCashMMYY_array), axis= 0)
+Div_and_Cash_reshape_array = np.moveaxis(np.reshape(Div_and_Cash_array, (len(Div_and_Cash_array) // (number_companies*2), 2, number_companies), order = 'F')[1:,:,:], [0, 1], [1, 0]) 
+#np.shape(Div_and_Cash_reshape_array)
+#np.shape(Paidi)
+np.shape(Div_and_Cash_reshape_array)
+#np.shape(BS_reshape_assets_movement)
+                                
+```
+
+```{python}
+cashflow_array = np.concatenate((Pnl_and_BS_adj_reshape_array,
+                                -1 * (BS_reshape_assets_movement),
+                                Paidin_cap_reshape_array,
+                                BS_reshape_liabilities_movement,
+                                Div_and_Cash_reshape_array                                 
+                                ), axis = 0)
+
+
+np.shape(cashflow_array)
+print(cashflow_array)
+```
+
+```{python}
+
+cashflow_out = np.reshape(cashflow_array, (number_cashflow_months * number_companies, len(header)-2))
+np.shape(cashflow_out)
+```
+
+```{python}
+header = [ 
+"party_id",
+"month",
+"Net Profit",
+"Depreciation",
+"Change in Accounts Payable",
+"Decrease in Current Borrowing (repayment)",
+"Increase (decrease) Other Liabilities",
+"Decrease in Long-term Borrowing (repayment)",
+"Capital Input",
+"Change in Accounts Receivable",
+"Change in Inventory",
+"Change in Other Short-term Assets",
+"Change in LT/ Capital Assets",
+"Dividends",
+"Cash Balance"
+]
+
+header_cashflow = np.reshape(header, (1, len(header)))
+
+```
+
+```{python}
+cashflow_months = months[1:]
+
+number_cashflow_months = len(cashflow_months)
+party_id =  np.reshape(([np.ones(number_cashflow_months) * company for company in range(number_companies)]),  (number_companies * number_cashflow_months, 1) )
+#np.shape(party_id)
+cashflow_months_out = np.reshape(cashflow_months*number_companies, (len(cashflow_months*number_companies), 1))
+np.shape(cashflow_months_out)
+#np.shape(cashflow_out)
+
+
+```
+
+```{python}
+block_cashflow = np.concatenate((party_id, cashflow_months_out, cashflow_out), axis = 1)
+#block_cashflow_out = np.concatenate((header, block_cashflow), axis = 1)
+```
+
+```{python}
+#np.shape(block_cashflow)
+block_cashflow_out = np.concatenate((header_cashflow, block_cashflow), axis = 0)
+```
+
+```{python}
+pd.DataFrame(block_cashflow_out).to_csv("\\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\cashflowv2.csv", header=None, index=None)
+```
+
+```{python}
+# customer embedding
+
+ESG_risk = np.reshape([0] * number_companies, (1, number_companies))
+past_repayment_history = np.reshape([0] * number_companies, (1, number_companies))
+lodgements_in_bank_account_in_last_3months = np.reshape([0] * number_companies, (1, number_companies))
+EBITDA = np.reshape([0] * number_companies, (1, number_companies))
+adjusted_EBITDA = np.reshape([0] * number_companies, (1, number_companies)) #(captial withdrawals added back in) 
+funding_gap = np.reshape([0] * number_companies, (1, number_companies)) # of business 
+IsUsing_all_facilities_already_paid_for = np.reshape([0] * number_companies, (1, number_companies)) #e.g. overdraft (intra day)
+age_of_account = np.reshape([0] * number_companies, (1, number_companies))
+overseas_invoices_ge_50k = np.reshape([0] * number_companies, (1, number_companies))
+DigitalRetailerNegCCC = np.reshape([0] * number_companies, (1, number_companies))
+UnencumberedAsset = np.reshape([0] * number_companies, (1, number_companies))
+InvoiceOpportunity = np.reshape([0] * number_companies, (1, number_companies))
+AssetNearEndOfLife = np.reshape([0] * number_companies, (1, number_companies))
+
+
+
+```
+
+```{python}
+np.shape(risk_profile)
+#np.shape(ESG_risk)
+```
+
+```{python}
+customer_embedding_array = np.concatenate((risk_profile,
+                                           ESG_risk,
+                                           past_repayment_history,
+                                           lodgements_in_bank_account_in_last_3months,
+                                           EBITDA,
+                                           adjusted_EBITDA,
+                                           funding_gap,
+                                           IsUsing_all_facilities_already_paid_for,
+                                           age_of_account,
+                                           overseas_invoices_ge_50k,
+                                           DigitalRetailerNegCCC,
+                                           UnencumberedAsset,
+                                           InvoiceOpportunity,
+                                           AssetNearEndOfLife                              
+                                          ), axis = 0)
+
+```
+
+```{python}
+#score = np.matmul(NBA_scorecard_array, customer_embedding_array )
+#np.shape(score)
+NBA_scorecard_array=np.array(NBA_scorecard_df)[2:,2:]
+
+#type(customer_embedding_array)
+score = np.matmul(NBA_scorecard_array.astype(float), customer_embedding_array.astype(float) )
+np.shape(score)
+print(score)
+
+number_actions = np.shape(score)[0]
+order = np.argsort(-score, axis=0)
+print(number_actions)
+
+```
+
+```{python}
+header = [ 
+"Id",
+"PartyId",
+"QueueType",
+"Fit Score",
+"DateCreated",
+"Status",
+"DateClosed"
+]
+
+header_nba = np.reshape(header, (1, len(header)))
+
+print(header_nba)
+```
+
+```{python}
+block = np.reshape(header, (1, len(header)))
+count_all_nba = 0
+for company in range(number_companies) :
+    id = []
+    party_id = []
+    QueueType=[]
+    Fit_score =[]
+    DateCreated = []
+    Status = []
+    DateClosed = []
+    count_nba = 0
+    for action in range(number_actions) :
+       if score[action, company] > 0 :
+          id = np.append(id, count_all_nba)
+          party_id = np.append(party_id, str(company))
+          QueueType = np.append(QueueType, actions_df.loc[action][1])  
+          Fit_score= np.append(Fit_score, score[action, company])
+          DateCreated = np.append(DateCreated,["8/31/2020  12:00:00 AM"]) 
+          Status = np.append(Status, ["Open"])
+          DateClosed = np.append(DateClosed,[""])   
+          count_nba += 1  
+          count_all_nba += 1
+       next_block = np.concatenate((id, party_id, QueueType, Fit_score, DateCreated, Status, DateClosed), axis = 0)  
+       cols = count_nba
+       rows = len(header)
+       next_block_reshape = np.reshape(next_block, (rows, cols))    
+       next_block_reshape_transpose = next_block_reshape.T
+    block = np.concatenate((block, next_block_reshape_transpose), axis=0)
+
+print(block)                        
+```
+
+```{python}
+print(actions_df.loc[1][1])
+```
+
+```{python}
+pd.DataFrame(block).to_csv(r"\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\NextBestActionv2.csv", header=None, index=None)
+```
