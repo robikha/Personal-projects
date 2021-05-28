@@ -1,0 +1,1815 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.2'
+      jupytext_version: 1.11.2
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+```{python}
+import pyodbc 
+# Some other example server values are
+# server = 'localhost\sqlexpress' # for a named instance
+# server = 'myserver,port' # to specify an alternate port
+server = 'obr-mvp-eun-s-sql.database.windows.net' 
+database = 'OBRPlatform' 
+username = 'C0a5827cvVC2c15' 
+password = '291C02k891e1a_d' 
+cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
+cursor = cnxn.cursor()
+```
+
+```{python}
+#Sample insert query
+c = cursor.execute("""
+SELECT table_name
+FROM information_schema.tables
+""")
+
+
+records = c.fetchall()
+for table in [r for r in records]: 
+    print(table[0])                      
+                       
+```
+
+```{python}
+import numpy as np
+
+c = cursor.execute("""
+SELECT *
+FROM ProfitAndLosses
+order by PartyId, PeriodEndDate, CreatedDate 
+
+""")
+
+#cols = [LineItems[2] for LineItems in c.fetchall()]
+cols = [desc[0] for desc in c.description]
+PnL_base_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+np.shape(cols)
+print(cols)
+PnL_base_T_df.PartyId.unique()
+print(PnL_base_T_df)
+```
+
+```{python}
+print(PnL_base_T_df[PnL_base_T_df["PartyId"] == 507])
+```
+
+```{python}
+
+c = cursor.execute("""
+SELECT *
+FROM BalanceSheets
+order by PartyId, SnapShotDate
+
+""")
+
+#cols = [LineItems[2] for LineItems in c.fetchall()]
+cols = [desc[0] for desc in c.description]
+BS_base_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+np.shape(cols)
+print(cols)
+BS_base_T_df.PartyId.unique()
+print(BS_base_T_df)
+```
+
+```{python}
+import numpy as np
+import pandas as pd
+
+c = cursor.execute("""
+SELECT  PartyId, 
+        PeriodEndDate, 
+        sum(CostOfSalesValue) as CostOfSalesValue , 
+        sum(OperatingExpenditureValue) as OperatingExpenditureValue, 
+        sum(OtherExpensesValue) as OtherExpensesValue,
+        sum(ProfitGrossValue) as ProfitGrossValue,
+        sum(ProfitNetValue) as ProfitNetValue,
+        sum(ProfitOperatingValue) as ProfitOperatingValue,
+        sum(TaxValue) as TaxValue,
+        sum(RevenueValue) as RevenueValue
+FROM ProfitAndLosses
+group by PartyId, PeriodEndDate
+
+""")
+
+#cols = [LineItems[2] for LineItems in c.fetchall()]
+cols = [desc[0] for desc in c.description]
+PnL_base_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+print(PnL_base_T_df)
+```
+
+```{python}
+#type(PnL_T_df['PeriodEndDate'][0])
+```
+
+```{python}
+#month = str(PnL_T_df['PeriodEndDate'][0]year) + str(PnL_T_df['PeriodEndDate'][0].month)
+month = PnL_base_T_df['PeriodEndDate'].dt.strftime('%b')
+year = PnL_base_T_df['PeriodEndDate'].dt.strftime('%Y')
+months =year + '-' + month
+
+print(months)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       PeriodEndDate, 
+       Sum(case When ABS(Rent) > 0 Then Rent Else 0 End) Rent
+FROM 
+ (
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          Sum(OperatingExpenditureValue) as Rent
+  FROM ProfitAndLosses  
+  JOIN ProfitAndLossLineItems ON ProfitAndLosses.Id = ProfitAndLossLineItems.ProfitAndLossLineItem_ProfitAndLossLineItems_Id
+  WHERE (ProfitAndLossLineItems.Description LIKE 'Rent' 
+  OR ProfitAndLossLineItems.Description LIKE 'rent'
+  OR ProfitAndLossLineItems.Description LIKE 'RENT')
+  AND (ProfitAndLossLineItems.Description NOT LIKE 'Equipment')
+  GROUP BY PartyId, PeriodEndDate 
+  UNION
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          0 AS Rent 
+  FROM ProfitAndLosses  
+  GROUP BY PartyId, PeriodEndDate         
+ ) AS subquery
+GROUP BY PartyId, PeriodEndDate   
+
+""")
+
+
+cols = [desc[0] for desc in c.description]
+Rent_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+print(Rent_T_df)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       PeriodEndDate, 
+       Sum(case When ABS(PayrollExpense) > 0 Then PayrollExpense Else 0 End) PayrollExpense
+FROM 
+ (
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          Sum(OperatingExpenditureValue) as PayrollExpense
+  FROM ProfitAndLosses  
+  JOIN ProfitAndLossLineItems ON ProfitAndLosses.Id = ProfitAndLossLineItems.ProfitAndLossLineItem_ProfitAndLossLineItems_Id
+  WHERE ProfitAndLossLineItems.Description LIKE '%Payroll%' 
+  OR ProfitAndLossLineItems.Description LIKE '%pay%'
+  OR ProfitAndLossLineItems.Description LIKE '%Pay%'
+  GROUP BY PartyId, PeriodEndDate 
+  UNION
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          0 AS PayrollExpense 
+  FROM ProfitAndLosses  
+  GROUP BY PartyId, PeriodEndDate         
+ ) AS subquery
+GROUP BY PartyId, PeriodEndDate   
+
+""")
+
+
+#cols = [LineItems[2] for LineItems in c.fetchall()]
+cols = [desc[0] for desc in c.description]
+Pay_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+print(Pay_T_df)
+```
+
+```{python}
+np.shape(Pay_T_df)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       PeriodEndDate, 
+       Sum(case When ABS(Depreciation) > 0 Then Depreciation Else 0 End) Depreciation
+FROM 
+ (
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          Sum(OperatingExpenditureValue) as Depreciation
+  FROM ProfitAndLosses  
+  JOIN ProfitAndLossLineItems ON ProfitAndLosses.Id = ProfitAndLossLineItems.ProfitAndLossLineItem_ProfitAndLossLineItems_Id
+  WHERE (ProfitAndLossLineItems.Description LIKE '%Depreciation%' 
+  OR ProfitAndLossLineItems.Description LIKE '%depreciation%')  
+  GROUP BY PartyId, PeriodEndDate 
+  UNION
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          0 AS Depreciation 
+  FROM ProfitAndLosses  
+  GROUP BY PartyId, PeriodEndDate         
+ ) AS subquery
+GROUP BY PartyId, PeriodEndDate   
+
+""")
+
+
+cols = [desc[0] for desc in c.description]
+Deprec_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+print(Deprec_T_df)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       PeriodEndDate, 
+       Sum(case When ABS(InterestExpense) > 0 Then InterestExpense Else 0 End) InterestExpense
+FROM 
+ (
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          Sum(OperatingExpenditureValue) as InterestExpense
+  FROM ProfitAndLosses  
+  JOIN ProfitAndLossLineItems ON ProfitAndLosses.Id = ProfitAndLossLineItems.ProfitAndLossLineItem_ProfitAndLossLineItems_Id
+  WHERE (ProfitAndLossLineItems.Description LIKE '%Interest%' 
+  OR ProfitAndLossLineItems.Description LIKE '%interest%')
+  GROUP BY PartyId, PeriodEndDate 
+  UNION
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          0 AS InterestExpense 
+  FROM ProfitAndLosses  
+  GROUP BY PartyId, PeriodEndDate         
+ ) AS subquery
+GROUP BY PartyId, PeriodEndDate   
+
+""")
+
+
+cols = [desc[0] for desc in c.description]
+Int_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+#print(Int_T_df[Int_T_df['PartyId'] == 1473])
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       PeriodEndDate, 
+       Sum(case When ABS(LoanRepayment) > 0 Then LoanRepayment Else 0 End) LoanRepayment
+FROM 
+ (
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          Sum(OperatingExpenditureValue) as LoanRepayment
+  FROM ProfitAndLosses  
+  JOIN ProfitAndLossLineItems ON ProfitAndLosses.Id = ProfitAndLossLineItems.ProfitAndLossLineItem_ProfitAndLossLineItems_Id
+  WHERE (ProfitAndLossLineItems.Description LIKE '%Loan Repayment%' 
+  OR ProfitAndLossLineItems.Description LIKE '%Repay%')
+  GROUP BY PartyId, PeriodEndDate 
+  UNION
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          0 AS LoanRepayment 
+  FROM ProfitAndLosses  
+  GROUP BY PartyId, PeriodEndDate         
+ ) AS subquery
+GROUP BY PartyId, PeriodEndDate   
+
+""")
+
+
+cols = [desc[0] for desc in c.description]
+Loan_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+print(Loan_T_df)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       PeriodEndDate, 
+       Sum(case When ABS(Inventory) > 0 Then Inventory Else 0 End) Inventory
+FROM 
+ (
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          Sum(OperatingExpenditureValue) as Inventory
+  FROM ProfitAndLosses  
+  JOIN ProfitAndLossLineItems ON ProfitAndLosses.Id = ProfitAndLossLineItems.ProfitAndLossLineItem_ProfitAndLossLineItems_Id
+  WHERE (ProfitAndLossLineItems.Description LIKE '%inventory%' 
+  OR ProfitAndLossLineItems.Description LIKE '%Inventory%')
+  GROUP BY PartyId, PeriodEndDate 
+  UNION
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          0 AS Inventory 
+  FROM ProfitAndLosses  
+  GROUP BY PartyId, PeriodEndDate         
+ ) AS subquery
+GROUP BY PartyId, PeriodEndDate   
+
+""")
+
+cols = [desc[0] for desc in c.description]
+Invent_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+#print(cols)
+#np.shape(Invent_T_df)
+print(Invent_T_df)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       PeriodEndDate, 
+       Sum(case When ABS(SalesAndMarketingExpense) > 0 Then SalesAndMarketingExpense Else 0 End) SalesAndMarketingExpense
+FROM 
+ (
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          Sum(OperatingExpenditureValue) as SalesAndMarketingExpense
+  FROM ProfitAndLosses  
+  JOIN ProfitAndLossLineItems ON ProfitAndLosses.Id = ProfitAndLossLineItems.ProfitAndLossLineItem_ProfitAndLossLineItems_Id
+  WHERE (ProfitAndLossLineItems.Description LIKE '%Marketing%' 
+  OR ProfitAndLossLineItems.Description LIKE '%marketing%')
+  GROUP BY PartyId, PeriodEndDate 
+  UNION
+  SELECT  PartyId, 
+          PeriodEndDate, 
+          0 AS SalesAndMarketingExpense 
+  FROM ProfitAndLosses  
+  GROUP BY PartyId, PeriodEndDate         
+ ) AS subquery
+GROUP BY PartyId, PeriodEndDate   
+
+""")
+
+cols = [desc[0] for desc in c.description]
+Market_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+#print(Market_T_df[Market_T_df['SalesAndMarketingExpense'] >0])
+```
+
+```{python}
+
+if np.shape(Rent_T_df)[0]>0 : PnL_T_df = pd.merge(PnL_base_T_df, Rent_T_df, on=["PartyId", "PeriodEndDate"], how="left", sort=False)
+if np.shape(Int_T_df)[0]>0 : PnL_T_df = pd.merge(PnL_T_df, Int_T_df, on=["PartyId", "PeriodEndDate"], how="left", sort=False)
+if np.shape(Deprec_T_df)[0]>0 : PnL_T_df = pd.merge(PnL_T_df, Deprec_T_df, on=["PartyId", "PeriodEndDate"], how="left", sort=False)
+if np.shape(Loan_T_df)[0]>0 : PnL_T_df = pd.merge(PnL_T_df, Loan_T_df, on=["PartyId", "PeriodEndDate"], how="left", sort=False)
+if np.shape(Invent_T_df)[0]>0 : PnL_T_df = pd.merge(PnL_T_df, Invent_T_df, on=["PartyId", "PeriodEndDate"], how="left", sort=False)
+if np.shape(Market_T_df)[0]>0 : PnL_T_df = pd.merge(PnL_T_df, Market_T_df, on=["PartyId", "PeriodEndDate"], how="left", sort=False)
+
+
+print(PnL_T_df)
+```
+
+```{python}
+
+```
+
+```{python}
+c = cursor.execute("""
+SELECT  PartyId, PeriodEndDate, count(*)
+FROM ProfitAndLosses  
+JOIN ProfitAndLossLineItems ON ProfitAndLosses.Id = ProfitAndLossLineItems.ProfitAndLossLineItem_ProfitAndLossLineItems_Id
+WHERE (ProfitAndLossLineItems.Description LIKE 'Rent' 
+OR ProfitAndLossLineItems.Description LIKE 'rent'
+OR ProfitAndLossLineItems.Description LIKE 'RENT')
+AND (ProfitAndLossLineItems.Description NOT LIKE 'Equipment')
+GROUP BY PartyId, PeriodEndDate 
+
+""")
+
+#cols = [LineItems[2] for LineItems in c.fetchall()]
+cols = [desc[0] for desc in c.description]
+PnL_detail_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+print(PnL_detail_T_df)
+```
+
+```{python}
+#month = str(PnL_T_df['PeriodEndDate'][0]year) + str(PnL_T_df['PeriodEndDate'][0].month)
+month = PnL_T_df['PeriodEndDate'].dt.strftime('%b')
+year = PnL_T_df['PeriodEndDate'].dt.strftime('%Y')
+months =year + '-' + month
+
+print(months)
+PnL_T_df['Month'] = months
+print(PnL_T_df)
+```
+
+```{python}
+# rename columns and reorder columns to match target
+
+rename_columns_dict = {
+'RevenueValue' : 'Sales',
+'CostOfSalesValue' : 'Total Cost of Sales',
+'ProfitGrossValue' : 'Gross Margin',
+'SalesAndMarketingExpense' : 'Total Sales & Marketing Expenses',
+'Rent' : 'Rent',
+'PayrollExpense' : 'Payroll Expense',
+'Depreciation' : 'Depreciation',
+'OperatingExpenditureValue' : 'Total General & Administrative Expenses',
+'LoanRepayment' : 'Loan Repayment',
+'Inventory' : 'Inventory',
+'OperatingExpenditureValue' : 'Total Operating Expenses',
+'ProfitOperatingValue' : 'Profit Before Interest and Taxes',
+'InterestExpense' : 'Interest Expense Short-term',
+'TaxValue' : 'Taxes Incurred',
+'OtherExpensesValue' : 'Extraordinary Items',
+'ProfitNetValue' : 'Net Profit'
+}
+
+PnL_T_df_x = PnL_T_df.rename(columns=rename_columns_dict)
+
+reordered_list = ["PartyId",
+"PeriodEndDate",                  
+"Sales",
+"Total Cost of Sales",
+"Gross Margin",
+"Total Sales & Marketing Expenses",
+"Rent",
+"Payroll Expense",
+"Total General & Administrative Expenses",
+"Loan Repayment",
+"Inventory",
+"Depreciation",
+"Total Operating Expenses",
+"Profit Before Interest and Taxes",
+"Interest Expense Short-term",
+"Interest Expense Long-term",
+"Taxes Incurred",
+"Extraordinary Items",
+"Net Profit",
+"Month"
+]
+
+PnL_T_df_y = PnL_T_df_x.reindex(columns=reordered_list)
+
+print(PnL_T_df_y)
+
+
+
+```
+
+```{python}
+c = cursor.execute("""
+SELECT distinct(PartyId)
+FROM ProfitAndLosses
+""")
+
+cols = [desc[0] for desc in c.description]
+companies_df = pd.DataFrame(c.fetchall(), columns=cols)
+companies_df.head()
+
+companies_s = pd.Series(companies_df["PartyId"])
+
+for company in companies_s : print(company)
+    
+```
+
+```{python}
+c = cursor.execute("""
+SELECT distinct(PartyId)
+FROM BalanceSheets
+""")
+
+cols = [desc[0] for desc in c.description]
+companies_df = pd.DataFrame(c.fetchall(), columns=cols)
+companies_df.head()
+
+companies_s = pd.Series(companies_df["PartyId"])
+
+for company in companies_s : print(company)
+    
+```
+
+```{python}
+import pandas as pd
+
+c = cursor.execute("""
+SELECT *
+FROM ProfitAndLossLineItems
+""")
+cols = [desc[0] for desc in c.description]
+ProfitAndLossLineItems_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+#ProfitAndLossLineItems_df.Description.unique()
+print(cols)
+ProfitAndLossLineItems_df.head()
+ProfitAndLossLineItems_df.AccountId.unique()
+ProfitAndLossLineItems_df.Description.unique()
+
+```
+
+```{python}
+c = cursor.execute("""
+SELECT *
+FROM BalanceSheetLineItems
+""")
+cols = [desc[0] for desc in c.description]
+BalanceSheetLineItems_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+
+#print(cols)
+#BalanceSheetLineItems_df.head()
+#BalanceSheetLineItems_df.AccountId.unique()
+#BalanceSheetLineItems_df.Description.unique()
+print(BalanceSheetLineItems_df[BalanceSheetLineItems_df['BalanceSheetLineItem_BalanceSheetLineItems_Id']== 526])
+
+```
+
+```{python}
+c = cursor.execute("""
+SELECT *
+FROM BalanceSheets
+""")
+cols = [desc[0] for desc in c.description]
+BS_base_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+
+#print(cols)
+#BalanceSheetLineItems_df.head()
+#BalanceSheetLineItems_df.AccountId.unique()
+#BalanceSheetLineItems_df.Description.unique()
+print(BS_base_T_df[BS_base_T_df['Id']== 526])
+```
+
+```{python}
+includeKeyWords = ['Rent', 'rent', 'lease', 'Lease']
+rent_str = '|'.join(includeKeyWords)
+Rent_mask = ProfitAndLossLineItems_df.stack().str.contains(rent_str).any(level=0)
+Rent_df = ProfitAndLossLineItems_df[Rent_mask]
+
+print(Rent_df)
+```
+
+```{python}
+print(Rent_df[Rent_df['Id'] == 2093])
+```
+
+```{python}
+includeKeyWords = ['Pay', 'pay', 'salar', 'Salar', 'Renumeration', 'renumeration', 'wage', 'Wage']
+pay_str = '|'.join(includeKeyWords)
+Pay_mask = ProfitAndLossLineItems_df.stack().str.contains(pay_str).any(level=0)
+Pay_df = ProfitAndLossLineItems_df[Pay_mask]
+print(Pay_df)
+
+```
+
+```{python}
+includeKeyWords = ['Depreciation', 'Deprec', 'deprec', 'depreciation']
+depr_str = '|'.join(includeKeyWords)
+depr_mask = ProfitAndLossLineItems_df.stack().str.contains(pay_str).any(level=0)
+depr_df = ProfitAndLossLineItems_df[depr_mask]
+print(depr_df)
+```
+
+```{python}
+includeKeyWords = ['Interest', 'interest']
+Int_str = '|'.join(includeKeyWords)
+Int_mask = ProfitAndLossLineItems_df.stack().str.contains(Int_str).any(level=0)
+Int_df = ProfitAndLossLineItems_df[Int_mask]
+print(Int_df)
+```
+
+```{python}
+includeKeyWords = ['Loan Repayment', 'Repay']
+Loan_str = '|'.join(includeKeyWords)
+Loan_mask = ProfitAndLossLineItems_df.stack().str.contains(Loan_str).any(level=0)
+Loan_df = ProfitAndLossLineItems_df[Loan_mask]
+print(Loan_df)
+```
+
+```{python}
+includeKeyWords = ['Inventory', 'inventory']
+Inv_str = '|'.join(includeKeyWords)
+Inv_mask = ProfitAndLossLineItems_df.stack().str.contains(Inv_str).any(level=0)
+Inv_df = ProfitAndLossLineItems_df[Inv_mask]
+print(Inv_df)
+```
+
+```{python}
+includeKeyWords = ['Marketing', 'marketing']
+Market_str = '|'.join(includeKeyWords)
+Market_mask = ProfitAndLossLineItems_df.stack().str.contains(Market_str).any(level=0)
+Market_df = ProfitAndLossLineItems_df[Market_mask]
+print(Market_df)
+```
+
+```{python}
+includeKeyWords = ['Cash', 'Bank', 'Savings', 'Checking','Undeposited Funds']
+Cash_str = '|'.join(includeKeyWords)
+Cash_mask = BalanceSheetLineItems_df.stack().str.contains(Cash_str).any(level=0)
+Cash_df = BalanceSheetLineItems_df[Cash_mask]
+
+#print(Cash_df)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       SnapshotDate, 
+       Sum(case When ABS(Cash) > 0 Then Cash Else 0 End) Cash
+FROM 
+ (
+  SELECT  PartyId, 
+          SnapshotDate, 
+          Sum(Value) as Cash
+  FROM BalanceSheets  
+  JOIN BalanceSheetLineItems ON BalanceSheets.Id = BalanceSheetLineItems.BalanceSheetLineItem_BalanceSheetLineItems_Id
+  WHERE (BalanceSheetLineItems.Description like '%Cash%'
+  OR BalanceSheetLineItems.Description like '%Bank%'
+  OR BalanceSheetLineItems.Description like '%Savings%'
+  OR BalanceSheetLineItems.Description like '%Checking%'
+  OR BalanceSheetLineItems.Description like '%Undeposited Funds%') 
+  GROUP BY PartyId, SnapshotDate 
+  UNION
+  SELECT  PartyId, 
+          SnapshotDate, 
+          0 AS Cash 
+  FROM BalanceSheets  
+  GROUP BY PartyId, SnapshotDate             
+ ) AS subquery
+GROUP BY PartyId, SnapshotDate       
+
+""")
+
+cols = [desc[0] for desc in c.description]
+Cash_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+print(Cash_T_df)
+```
+
+```{python}
+includeKeyWords = ['Accounts Receivable', 'Debtors']
+AccRec_str = '|'.join(includeKeyWords)
+AccRec_mask = BalanceSheetLineItems_df.stack().str.contains(AccRec_str).any(level=0)
+AccRec_df = BalanceSheetLineItems_df[AccRec_mask]
+
+print(AccRec_df)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       SnapshotDate, 
+       Sum(case When ABS(AccountReceivables) > 0 Then AccountReceivables Else 0 End) AccountReceivables
+FROM 
+ (
+  SELECT  PartyId, 
+          SnapshotDate, 
+          Sum(Value) as AccountReceivables
+  FROM BalanceSheets  
+  JOIN BalanceSheetLineItems ON BalanceSheets.Id = BalanceSheetLineItems.BalanceSheetLineItem_BalanceSheetLineItems_Id
+  WHERE (BalanceSheetLineItems.Description like '%Accounts Receivable%'
+  OR BalanceSheetLineItems.Description like '%Debtors%') 
+  GROUP BY PartyId, SnapshotDate 
+  UNION
+  SELECT  PartyId, 
+          SnapshotDate, 
+          0 AS AccountReceivables 
+  FROM BalanceSheets  
+  GROUP BY PartyId, SnapshotDate             
+ ) AS subquery
+GROUP BY PartyId, SnapshotDate       
+
+""")
+
+cols = [desc[0] for desc in c.description]
+AccRec_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+print(AccRec_T_df)
+```
+
+```{python}
+includeKeyWords = ['Inventory', 'Stock Asset']
+Inventory_BS_str = '|'.join(includeKeyWords)
+Inventory_BS_mask = BalanceSheetLineItems_df.stack().str.contains(Inventory_BS_str).any(level=0)
+Inventory_BS_df = BalanceSheetLineItems_df[Inventory_BS_mask]
+
+print(Inventory_BS_df)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       SnapshotDate, 
+       Sum(case When ABS(Inventory) > 0 Then Inventory Else 0 End) Inventory
+FROM 
+ (
+  SELECT  PartyId, 
+          SnapshotDate, 
+          Sum(Value) as Inventory
+  FROM BalanceSheets  
+  JOIN BalanceSheetLineItems ON BalanceSheets.Id = BalanceSheetLineItems.BalanceSheetLineItem_BalanceSheetLineItems_Id
+  WHERE (BalanceSheetLineItems.Description like '%Inventory%'
+  OR BalanceSheetLineItems.Description like '%Stock Asset%') 
+  GROUP BY PartyId, SnapshotDate 
+  UNION
+  SELECT  PartyId, 
+          SnapshotDate, 
+          0 AS Inventory 
+  FROM BalanceSheets  
+  GROUP BY PartyId, SnapshotDate             
+ ) AS subquery
+GROUP BY PartyId, SnapshotDate       
+
+""")
+
+cols = [desc[0] for desc in c.description]
+Inventory_BS_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+print(Inventory_BS_T_df)
+```
+
+```{python}
+includeKeyWords = ['Other short-term Assets','Other Current Assets']
+Oth_ST_Assets_str = '|'.join(includeKeyWords)
+Oth_ST_Assets_mask = BalanceSheetLineItems_df.stack().str.contains(Oth_ST_Assets_str).any(level=0)
+Oth_ST_Assets_df = BalanceSheetLineItems_df[Oth_ST_Assets_mask]
+
+# Default value of display.max_rows is 10 i.e. at max 10 rows will be printed.
+# Set it None to display all rows in the dataframe
+pd.set_option('display.max_rows', None)
+print(Oth_ST_Assets_df[['Category','Description', 'AccountQualifiedCategory', 'AccountQualifiedName']].stack().unique)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       SnapshotDate, 
+       Sum(case When ABS(OtherSTAssets) > 0 Then OtherSTAssets Else 0 End) OtherSTAssets
+FROM 
+ (
+  SELECT  PartyId, 
+          SnapshotDate, 
+          Sum(Value) as OtherSTAssets
+  FROM BalanceSheets  
+  JOIN BalanceSheetLineItems ON BalanceSheets.Id = BalanceSheetLineItems.BalanceSheetLineItem_BalanceSheetLineItems_Id
+  WHERE (BalanceSheetLineItems.Description like '%Other short-term Assets%'
+  OR BalanceSheetLineItems.Description like '%Other Current Assets%') 
+  GROUP BY PartyId, SnapshotDate 
+  UNION
+  SELECT  PartyId, 
+          SnapshotDate, 
+          0 AS OtherSTAssets 
+  FROM BalanceSheets  
+  GROUP BY PartyId, SnapshotDate             
+ ) AS subquery
+GROUP BY PartyId, SnapshotDate       
+
+""")
+
+cols = [desc[0] for desc in c.description]
+Oth_ST_Assets_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+print(Oth_ST_Assets_T_df)
+```
+
+```{python}
+
+includeKeyWords = ['Accounts Payable']
+AccPay_str = '|'.join(includeKeyWords)
+AccPay_mask = BalanceSheetLineItems_df.stack().str.contains(AccPay_str).any(level=0)
+AccPay_df = BalanceSheetLineItems_df[AccPay_mask]
+
+# Default value of display.max_rows is 10 i.e. at max 10 rows will be printed.
+# Set it None to display all rows in the dataframe
+#pd.set_option('display.max_rows', None)
+print(AccPay_df[['Category','Description', 'AccountQualifiedCategory', 'AccountQualifiedName']].stack().unique)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       SnapshotDate, 
+       Sum(case When ABS(AccountsPayable) > 0 Then AccountsPayable Else 0 End) AccountsPayable
+FROM 
+ (
+  SELECT  PartyId, 
+          SnapshotDate, 
+          Sum(Value) as AccountsPayable
+  FROM BalanceSheets  
+  JOIN BalanceSheetLineItems ON BalanceSheets.Id = BalanceSheetLineItems.BalanceSheetLineItem_BalanceSheetLineItems_Id
+  WHERE (BalanceSheetLineItems.Description like '%Accounts Payable%') 
+  GROUP BY PartyId, SnapshotDate 
+  UNION
+  SELECT  PartyId, 
+          SnapshotDate, 
+          0 AS AccountsPayable 
+  FROM BalanceSheets  
+  GROUP BY PartyId, SnapshotDate             
+ ) AS subquery
+GROUP BY PartyId, SnapshotDate       
+
+""")
+
+cols = [desc[0] for desc in c.description]
+AccPay_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+print(AccPay_T_df)
+```
+
+```{python}
+
+includeKeyWords = ['Short_term Notes', 'Mastercard', 'Visa', 'Loan Payable']
+ST_Notes_str = '|'.join(includeKeyWords)
+ST_Notes_mask = BalanceSheetLineItems_df.stack().str.contains(ST_Notes_str).any(level=0)
+ST_Notes_df = BalanceSheetLineItems_df[ST_Notes_mask]
+
+# Default value of display.max_rows is 10 i.e. at max 10 rows will be printed.
+# Set it None to display all rows in the dataframe
+#pd.set_option('display.max_rows', None)
+print(ST_Notes_df[['Category','Description', 'AccountQualifiedCategory', 'AccountQualifiedName']].stack().unique)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       SnapshotDate, 
+       Sum(case When ABS(ST_Notes) > 0 Then ST_Notes Else 0 End) ST_Notes
+FROM 
+ (
+  SELECT  PartyId, 
+          SnapshotDate, 
+          Sum(Value) as ST_Notes
+  FROM BalanceSheets  
+  JOIN BalanceSheetLineItems ON BalanceSheets.Id = BalanceSheetLineItems.BalanceSheetLineItem_BalanceSheetLineItems_Id
+  WHERE (BalanceSheetLineItems.Description like '%Short_term Notes%'
+  OR BalanceSheetLineItems.Description like '%Mastercard%'
+  OR BalanceSheetLineItems.Description like '%Visa%'
+  OR BalanceSheetLineItems.Description like '%Loan Payable%') 
+  GROUP BY PartyId, SnapshotDate 
+  UNION
+  SELECT  PartyId, 
+          SnapshotDate, 
+          0 AS ST_Notes 
+  FROM BalanceSheets  
+  GROUP BY PartyId, SnapshotDate             
+ ) AS subquery
+GROUP BY PartyId, SnapshotDate       
+
+""")
+
+cols = [desc[0] for desc in c.description]
+ST_Notes_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+print(ST_Notes_T_df)
+```
+
+```{python}
+
+includeKeyWords = ['Note Payable', 'Notes Payable']
+LT_Notes_str = '|'.join(includeKeyWords)
+LT_Notes_mask = BalanceSheetLineItems_df.stack().str.contains(LT_Notes_str).any(level=0)
+LT_Notes_df = BalanceSheetLineItems_df[LT_Notes_mask]
+
+# Default value of display.max_rows is 10 i.e. at max 10 rows will be printed.
+# Set it None to display all rows in the dataframe
+#pd.set_option('display.max_rows', None)
+print(LT_Notes_df[['Category','Description', 'AccountQualifiedCategory', 'AccountQualifiedName']].stack().unique)
+print(LT_Notes_df)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       SnapshotDate, 
+       Sum(case When ABS(LT_Notes) > 0 Then LT_Notes Else 0 End) LT_Notes
+FROM 
+ (
+  SELECT  PartyId, 
+          SnapshotDate, 
+          Sum(Value) as LT_Notes
+  FROM BalanceSheets  
+  JOIN BalanceSheetLineItems ON BalanceSheets.Id = BalanceSheetLineItems.BalanceSheetLineItem_BalanceSheetLineItems_Id
+  WHERE (BalanceSheetLineItems.Description like '%Note Payable%'
+  OR BalanceSheetLineItems.Description like '%Note Payables%') 
+  GROUP BY PartyId, SnapshotDate 
+  UNION
+  SELECT  PartyId, 
+          SnapshotDate, 
+          0 AS LT_Notes 
+  FROM BalanceSheets  
+  GROUP BY PartyId, SnapshotDate             
+ ) AS subquery
+GROUP BY PartyId, SnapshotDate       
+
+""")
+
+cols = [desc[0] for desc in c.description]
+LT_Notes_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+print(LT_Notes_T_df)
+```
+
+```{python}
+
+includeKeyWords = ['Other Current Liabilities', 'OtherCurrent Liabilities', 'OtherCurrentLiabilities']
+Oth_ST_Liabilities_str = '|'.join(includeKeyWords)
+Oth_ST_Liabilities_mask = BalanceSheetLineItems_df.stack().str.contains(Oth_ST_Liabilities_str).any(level=0)
+Oth_ST_Liabilities_df = BalanceSheetLineItems_df[Oth_ST_Liabilities_mask]
+
+# Default value of display.max_rows is 10 i.e. at max 10 rows will be printed.
+# Set it None to display all rows in the dataframe
+#pd.set_option('display.max_rows', None)
+print(Oth_ST_Liabilities_df[['Category','Description', 'AccountQualifiedCategory', 'AccountQualifiedName']].stack().unique)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       SnapshotDate, 
+       Sum(case When ABS(OtherSTLiabilities) > 0 Then OtherSTLiabilities Else 0 End) OtherSTLiabilities
+FROM 
+ (
+  SELECT  PartyId, 
+          SnapshotDate, 
+          Sum(Value) as OtherSTLiabilities
+  FROM BalanceSheets  
+  JOIN BalanceSheetLineItems ON BalanceSheets.Id = BalanceSheetLineItems.BalanceSheetLineItem_BalanceSheetLineItems_Id
+  WHERE (BalanceSheetLineItems.Description like '%Other Current Liabilities%'
+  OR BalanceSheetLineItems.Description like '%OtherCurrent Liabilities%'
+  OR BalanceSheetLineItems.Description like '%OtherCurrentLiabilities%') 
+  GROUP BY PartyId, SnapshotDate 
+  UNION
+  SELECT  PartyId, 
+          SnapshotDate, 
+          0 AS OtherSTLiabilities 
+  FROM BalanceSheets  
+  GROUP BY PartyId, SnapshotDate             
+ ) AS subquery
+GROUP BY PartyId, SnapshotDate       
+
+""")
+
+cols = [desc[0] for desc in c.description]
+Oth_ST_Liabilities_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+print(Oth_ST_Liabilities_T_df)
+```
+
+```{python}
+
+includeKeyWords = ["Owner's Equity - Contributions"]
+PaidInCap_str = '|'.join(includeKeyWords)
+PaidInCap_mask = BalanceSheetLineItems_df.stack().str.contains(PaidInCap_str).any(level=0)
+PaidInCap_df = BalanceSheetLineItems_df[PaidInCap_mask]
+
+# Default value of display.max_rows is 10 i.e. at max 10 rows will be printed.
+# Set it None to display all rows in the dataframe
+#pd.set_option('display.max_rows', None)
+print(PaidInCap_df[['Category','Description', 'AccountQualifiedCategory', 'AccountQualifiedName']].stack().unique)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       SnapshotDate, 
+       Sum(case When ABS(PaidInCapital) > 0 Then PaidInCapital Else 0 End) PaidInCapital
+FROM 
+ (
+  SELECT  PartyId, 
+          SnapshotDate, 
+          Sum(Value) as PaidInCapital
+  FROM BalanceSheets  
+  JOIN BalanceSheetLineItems ON BalanceSheets.Id = BalanceSheetLineItems.BalanceSheetLineItem_BalanceSheetLineItems_Id
+  WHERE (BalanceSheetLineItems.Description like '%Equity - Contributions%') 
+  GROUP BY PartyId, SnapshotDate 
+  UNION
+  SELECT  PartyId, 
+          SnapshotDate, 
+          0 AS PaidInCapital 
+  FROM BalanceSheets  
+  GROUP BY PartyId, SnapshotDate             
+ ) AS subquery
+GROUP BY PartyId, SnapshotDate       
+
+""")
+
+cols = [desc[0] for desc in c.description]
+PaidInCap_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+print(PaidInCap_T_df)
+```
+
+```{python}
+
+includeKeyWords = ["Owner's Equity - Draws"]
+DividendPaid_str = '|'.join(includeKeyWords)
+DividendPaid_mask = BalanceSheetLineItems_df.stack().str.contains(DividendPaid_str).any(level=0)
+DividendPaid_df = BalanceSheetLineItems_df[DividendPaid_mask]
+
+# Default value of display.max_rows is 10 i.e. at max 10 rows will be printed.
+# Set it None to display all rows in the dataframe
+#pd.set_option('display.max_rows', None)
+print(DividendPaid_df[['Category','Description', 'AccountQualifiedCategory', 'AccountQualifiedName']].stack().unique)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       SnapshotDate, 
+       Sum(case When ABS(DividendPaid) > 0 Then DividendPaid Else 0 End) DividendPaid
+FROM 
+ (
+  SELECT  PartyId, 
+          SnapshotDate, 
+          Sum(Value) as DividendPaid
+  FROM BalanceSheets  
+  JOIN BalanceSheetLineItems ON BalanceSheets.Id = BalanceSheetLineItems.BalanceSheetLineItem_BalanceSheetLineItems_Id
+  WHERE (BalanceSheetLineItems.Description like '%Equity - Draws%') 
+  GROUP BY PartyId, SnapshotDate 
+  UNION
+  SELECT  PartyId, 
+          SnapshotDate, 
+          0 AS DividendPaid 
+  FROM BalanceSheets  
+  GROUP BY PartyId, SnapshotDate             
+ ) AS subquery
+GROUP BY PartyId, SnapshotDate       
+
+""")
+
+cols = [desc[0] for desc in c.description]
+DividendPaid_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+print(DividendPaid_T_df)
+```
+
+```{python}
+includeKeyWords = ["Retained Earnings"]
+RetainedEarnings_str = '|'.join(includeKeyWords)
+RetainedEarnings_mask = BalanceSheetLineItems_df.stack().str.contains(RetainedEarnings_str).any(level=0)
+RetainedEarnings_df = BalanceSheetLineItems_df[RetainedEarnings_mask]
+
+# Default value of display.max_rows is 10 i.e. at max 10 rows will be printed.
+# Set it None to display all rows in the dataframe
+pd.set_option('display.max_rows', 10)
+print(RetainedEarnings_df[['Category','Description', 'AccountQualifiedCategory', 'AccountQualifiedName']].stack().unique)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       SnapshotDate, 
+       Sum(case When ABS(RetainedEarnings) > 0 Then RetainedEarnings Else 0 End) RetainedEarnings
+FROM 
+ (
+  SELECT  PartyId, 
+          SnapshotDate, 
+          Sum(Value) as RetainedEarnings
+  FROM BalanceSheets  
+  JOIN BalanceSheetLineItems ON BalanceSheets.Id = BalanceSheetLineItems.BalanceSheetLineItem_BalanceSheetLineItems_Id
+  WHERE (BalanceSheetLineItems.Description like '%Retained Earnings%') 
+  GROUP BY PartyId, SnapshotDate 
+  UNION
+  SELECT  PartyId, 
+          SnapshotDate, 
+          0 AS RetainedEarnings 
+  FROM BalanceSheets  
+  GROUP BY PartyId, SnapshotDate             
+ ) AS subquery
+GROUP BY PartyId, SnapshotDate       
+
+""")
+
+cols = [desc[0] for desc in c.description]
+RetainedEarnings_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+print(RetainedEarnings_T_df)
+```
+
+```{python}
+includeKeyWords = ["Current Year Earnings", 'Profit for the year']
+Earnings_str = '|'.join(includeKeyWords)
+Earnings_mask = BalanceSheetLineItems_df.stack().str.contains(Earnings_str).any(level=0)
+Earnings_df = BalanceSheetLineItems_df[Earnings_mask]
+
+# Default value of display.max_rows is 10 i.e. at max 10 rows will be printed.
+# Set it None to display all rows in the dataframe
+#pd.set_option('display.max_rows', None)
+print(Earnings_df[['Category','Description', 'AccountQualifiedCategory', 'AccountQualifiedName']].stack().unique)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT PartyId, 
+       SnapshotDate, 
+       Sum(case When ABS(CurrentEarnings) > 0 Then CurrentEarnings Else 0 End) CurrentEarnings
+FROM 
+ (
+  SELECT  PartyId, 
+          SnapshotDate, 
+          Sum(Value) as CurrentEarnings
+  FROM BalanceSheets  
+  JOIN BalanceSheetLineItems ON BalanceSheets.Id = BalanceSheetLineItems.BalanceSheetLineItem_BalanceSheetLineItems_Id
+  WHERE (BalanceSheetLineItems.Description like '%Current Year Earnings%'
+  OR BalanceSheetLineItems.Description like '%Profit for the year%' ) 
+  GROUP BY PartyId, SnapshotDate 
+  UNION
+  SELECT  PartyId, 
+          SnapshotDate, 
+          0 AS CurrentEarnings 
+  FROM BalanceSheets  
+  GROUP BY PartyId, SnapshotDate             
+ ) AS subquery
+GROUP BY PartyId, SnapshotDate       
+
+""")
+
+cols = [desc[0] for desc in c.description]
+Earnings_T_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+print(Earnings_T_df)
+```
+
+```{python}
+
+if np.shape(Cash_T_df)[0]>0 : BS_T_df = pd.merge(BS_base_T_df, Cash_T_df, on=["PartyId", "SnapshotDate"], how="left", sort=False)
+if np.shape(AccRec_T_df)[0]>0 : BS_T_df = pd.merge(BS_T_df, AccRec_T_df, on=["PartyId", "SnapshotDate"], how="left", sort=False)
+if np.shape(Inventory_BS_T_df)[0]>0 : BS_T_df = pd.merge(BS_T_df, Inventory_BS_T_df, on=["PartyId", "SnapshotDate"], how="left", sort=False)
+if np.shape(Oth_ST_Assets_T_df)[0]>0 : BS_T_df = pd.merge(BS_T_df, Oth_ST_Assets_T_df, on=["PartyId", "SnapshotDate"], how="left", sort=False)
+if np.shape(AccPay_T_df)[0]>0 : BS_T_df = pd.merge(BS_T_df, AccPay_T_df, on=["PartyId", "SnapshotDate"], how="left", sort=False)
+if np.shape(ST_Notes_T_df)[0]>0 : BS_T_df = pd.merge(BS_T_df, ST_Notes_T_df, on=["PartyId", "SnapshotDate"], how="left", sort=False)
+if np.shape(LT_Notes_T_df)[0]>0 : BS_T_df = pd.merge(BS_T_df, LT_Notes_T_df, on=["PartyId", "SnapshotDate"], how="left", sort=False)
+if np.shape(Oth_ST_Liabilities_T_df)[0]>0 : BS_T_df = pd.merge(BS_T_df, Oth_ST_Liabilities_T_df, on=["PartyId", "SnapshotDate"], how="left", sort=False)
+if np.shape(PaidInCap_T_df)[0]>0 : BS_T_df = pd.merge(BS_T_df, PaidInCap_T_df, on=["PartyId", "SnapshotDate"], how="left", sort=False)
+if np.shape(DividendPaid_T_df)[0]>0 : BS_T_df = pd.merge(BS_T_df, DividendPaid_T_df, on=["PartyId", "SnapshotDate"], how="left", sort=False)
+if np.shape(RetainedEarnings_T_df)[0]>0 : BS_T_df = pd.merge(BS_T_df, RetainedEarnings_T_df, on=["PartyId", "SnapshotDate"], how="left", sort=False)
+if np.shape(Earnings_T_df)[0]>0 : BS_T_df = pd.merge(BS_T_df, Earnings_T_df, on=["PartyId", "SnapshotDate"], how="left", sort=False)
+
+
+print(BS_T_df)
+for col in BS_T_df.columns:
+    print(col)
+```
+
+```{python}
+
+#data['Date'] = data['Date'].apply(lambda x: datetime.strptime(x, '%d/%m/%Y'))
+
+month = BS_T_df['SnapshotDate'].apply(lambda x: datetime.datetime.strftime(x, '%b'))
+year = BS_T_df['SnapshotDate'].apply(lambda x: datetime.datetime.strftime(x, '%Y'))
+months = year + '-' + month
+
+#print(months)
+BS_T_df['months'] = months
+print(BS_T_df)
+
+```
+
+```{python}
+#data['Date'] = data['Date'].apply(lambda x: datetime.strptime(x, '%d/%m/%Y'))
+
+month = BS_T_df['SnapshotDate'].apply(lambda x: datetime.datetime.strftime(x, '%b'))
+year = BS_T_df['SnapshotDate'].apply(lambda x: datetime.datetime.strftime(x, '%Y'))
+months = year + '-' + month
+
+#print(months)
+BS_T_df['months'] = months
+
+
+# rename columns and reorder columns to match target
+
+rename_columns_dict = {
+"Cash" : "Cash",
+"AccountReceivables"  : "Accounts Receivable",
+"Inventory" : "Inventory",
+"OtherSTAssets" : "Other Short-term Assets",
+"TotalCurrentAssetsValue" : "Total Short-term Assets",
+"TotalFixedAssetsValue" : "Long-term Assets",
+"TotalAssetsValue" : "Total Assets",
+"AccountsPayable" : "Accounts Payable",
+"ST_Notes" : "Short-term Notes",
+"OtherSTLiabilities" : "Other Short-term Liabilities",
+"TotalCurrentLiabilitiesValue" : "Subtotal Short-term Liabilities",
+"LongTermLiabilitiesValue" : "Long-term Liabilities",
+"TotalLiabilitiesValue" : "Total Liabilities",
+"PaidInCapital" : "Paid in Capital",
+"DividendPaid" : "Dividends paid",
+"RetainedEarnings" : "Retained Earnings",
+"CurrentEarnings" : "Earnings",
+"TotalEquityValue" : "Total Capital",
+"months" : "Month"    
+}
+
+BS_T_df_x = BS_T_df.rename(columns=rename_columns_dict)
+
+reordered_list = [
+"PartyId",
+"SnapshotDate",
+"Accounts Receivable",
+"Inventory",
+"Other Short-term Assets",
+"Total Short-term Assets",    
+"Long-term Assets",
+"Total Assets",
+"Cash",
+"Accounts Payable",
+"Short-term Notes",
+"Other Short-term Liabilities",
+"Subtotal Short-term Liabilities",    
+"Long-term Liabilities",
+"Total Liabilities",
+"Paid in Capital",
+"Dividends paid",
+"Retained Earnings",    
+"Earnings",    
+"Total Capital",   
+"Net Worth",
+"Month"
+]
+
+BS_T_df_y = BS_T_df_x.reindex(columns=reordered_list)
+
+print(BS_T_df_x)
+
+#for col in BS_T_df_y.columns:
+#    print(col)
+
+```
+
+```{python}
+c = cursor.execute("""
+SELECT *
+FROM BalanceSheetLineItems
+
+""")
+cols = [desc[0] for desc in c.description]
+BS_LineItems_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+
+BS_LineItems_df.head()
+#BS_LineItems_df.Description.unique().
+BS_LineItems_df.Id.unique()
+```
+
+```{python}
+print(np.asarray(BS_LineItems_df)[:,2])
+
+```
+
+```{python}
+#print(BS_T_df_y)
+for col in BS_T_df_y.columns:
+    print(col)
+for col in PnL_T_df_y.columns:
+    print(col)
+    
+
+```
+
+```{python}
+PnL_T_df = PnL_T_df_y
+BS_T_df = BS_T_df_y
+
+PnL_items=list(PnL_T_df.columns)
+
+PnL_key_items =[
+"PartyId",
+"Sales",
+"Total Cost of Sales",
+"Gross Margin",
+"Total Sales & Marketing Expenses",
+"Rent",
+"Payroll Expense",
+"Total General & Administrative Expenses",
+"Loan Repayment",
+"Inventory",
+"Depreciation",
+"Total Operating Expenses",
+"Profit Before Interest and Taxes",
+"Interest Expense Short-term",
+"Interest Expense Long-term",
+"Taxes Incurred",
+"Extraordinary Items",
+"Net Profit"
+]
+
+BS_items = list(BS_T_df.columns)
+
+#"Id","PartyId","CreatedDate", "ValidDate", "TotalLiabilitiesValue", "CurrencyCode", "TotalAssetsValue", "TotalCurrentAssetsValue","TotalCurrentLiabilitiesValue","TotalEquityValue","TotalFixedAssetsValue","LongTermLiabilitiesValue","ModifiedDate","SnapshotDate", "Month"]
+BS_key_items = [
+"PartyId",
+"Accounts Receivable",
+"Inventory",
+"Other Short-term Assets",
+"Total Short-term Assets",
+"Long-term Assets",
+"Total Assets",
+"Cash",
+"Accounts Payable",
+"Short-term Notes",
+"Other Short-term Liabilities",
+"Subtotal Short-term Liabilities",
+"Long-term Liabilities",
+"Total Liabilities",
+"Paid in Capital",
+"Dividends paid",
+"Retained Earnings",
+"Earnings",
+"Total Capital",
+"Net Worth"
+]
+
+```
+
+```{python}
+PnL_items=list(PnL_T_df_y.columns)
+print(PnL_items)
+```
+
+```{python}
+print(BS_T_df)
+```
+
+```{python}
+#import pandas as pd
+#from datetime import datetime
+#months= pd.date_range(datetime.today(), periods=100).to_pydatetime().tolist()
+
+
+import datetime
+
+end = datetime.datetime.today()
+start = end - datetime.timedelta(days=365 * 3 - 30 )
+date_generated = pd.Series([start + datetime.timedelta(days=x) for x in range(0, (end-start).days, int(365/12))])
+
+month = date_generated.dt.strftime('%b')
+year = date_generated.dt.strftime('%Y')
+months =year + '-' + month
+
+#np.shape(months)
+
+#print(PnL_36)
+
+#PnL_items =['PartyId', 'PeriodEndDate', 'CostOfSalesValue', 'OperatingExpenditureValue', 'OtherExpensesValue', 'ProfitGrossValue','ProfitNetValue', 'ProfitOperatingValue', 'TaxValue', 'RevenueValue', 'Rent', 'Month' ]
+#PnL_key_items =['PartyId', 'CostOfSalesValue', 'OperatingExpenditureValue', 'OtherExpensesValue', 'ProfitGrossValue','ProfitNetValue', 'ProfitOperatingValue', 'TaxValue', 'RevenueValue', 'Rent']
+#BS_items = ["Id","PartyId","CreatedDate", "ValidDate", "TotalLiabilitiesValue", "CurrencyCode", "TotalAssetsValue", "TotalCurrentAssetsValue","TotalCurrentLiabilitiesValue","TotalEquityValue","TotalFixedAssetsValue","LongTermLiabilitiesValue","ModifiedDate","SnapshotDate", "Month"]
+#BS_key_items = ["PartyId","TotalLiabilitiesValue", "TotalAssetsValue", "TotalCurrentAssetsValue","TotalCurrentLiabilitiesValue","TotalEquityValue","TotalFixedAssetsValue","LongTermLiabilitiesValue"]
+BS_T_nrows, BS_T_ncols = np.shape(BS_T_df)
+PnL_T_nrows, PnL_T_ncols = np.shape(PnL_T_df)
+first_company = 0 
+
+for n, company in enumerate(companies_s) :
+    if n == 0 | first_company == 0 : 
+        BS_36 = np.zeros([len(BS_key_items), 36])
+        BS = BS_T_df.loc[(BS_T_df['PartyId'] == list(company)*BS_T_nrows) & (BS_T_df['SnapshotDate'] >= start)].T.to_numpy()
+        BS_st = set(BS[-1,:])
+        BS_36_cols= {e:i for i, e in enumerate(months) if e in BS_st}
+        BS_key_items_st = set(BS_key_items)
+        BS_key_items_rows= {e:i for i, e in enumerate(BS_items) if e in BS_key_items_st}
+        if len(BS_36_cols) : 
+            BS_36[:, list(BS_36_cols.values())] = BS[list(BS_key_items_rows.values()), :]
+            first_company = 1
+    else :
+        BS_36_next = np.zeros([len(BS_key_items), 36])
+        BS_next = BS_T_df.loc[(BS_T_df['PartyId'] == list(company)*BS_T_nrows) & (BS_T_df['SnapshotDate'] >= start)].T.to_numpy()
+        BS_next_st = set(BS_next[-1,:])
+        BS_36_cols= {e:i for i, e in enumerate(months) if e in BS_next_st}
+        BS_key_items_st = set(BS_key_items)
+        BS_key_items_rows= {e:i for i, e in enumerate(BS_items) if e in BS_key_items_st}
+        if len(BS_36_cols) :
+            BS_36_next[:, list(BS_36_cols.values())] = BS_next[list(BS_key_items_rows.values()), :]
+            BS_36 = np.dstack((BS_36, BS_36_next))
+ 
+        
+np.shape(BS_36)
+#print(BS_36)
+```
+
+```{python}
+#len(companies_s)
+#print(end)
+
+#np.shape(BS_T_df[BS_T_df['SnapshotDate']>=start])
+
+#print(BS_T_df[BS_T_df['PartyId'] == list(companies_s[0])*BS_T_nrows])
+print(BS[-1,:])
+```
+
+```{python}
+first_company = 0 
+
+for n, company in enumerate(companies_s) :
+    if n == 0 | first_company == 0 :
+        PnL_36 = np.zeros([len(PnL_key_items), 36])
+        PnL = PnL_T_df.loc[(PnL_T_df['PartyId'] == list(company)*PnL_T_nrows) & (PnL_T_df['PeriodEndDate'] >= start)].T.to_numpy()
+        PnL_st = set(PnL[-1,:])
+        PnL_36_cols= {e:i for i, e in enumerate(months) if e in PnL_st}
+        PnL_key_items_st = set(PnL_key_items)
+        PnL_key_items_rows= {e:i for i, e in enumerate(PnL_items) if e in PnL_key_items_st}
+        if len(PnL_36_cols) > 0 : 
+            PnL_36[:, list(PnL_36_cols.values())] = PnL[list(PnL_key_items_rows.values()), :]
+            first_company = 1
+    else :
+        PnL_36_next = np.zeros([len(PnL_key_items), 36])
+        PnL_next = PnL_T_df.loc[(PnL_T_df['PartyId'] == list(company)*PnL_T_nrows) & (PnL_T_df['PeriodEndDate'] >= start)].T.to_numpy()
+        PnL_next_st = set(PnL_next[-1,:])
+        PnL_36_cols= {e:i for i, e in enumerate(months) if e in PnL_next_st}
+        PnL_key_items_st = set(PnL_key_items)
+        PnL_key_items_rows= {e:i for i, e in enumerate(PnL_items) if e in PnL_key_items_st}
+        if len(PnL_36_cols) > 0 : 
+            PnL_36_next[:, list(PnL_36_cols.values())] = PnL_next[list(PnL_key_items_rows.values()), :]
+            PnL_36 = np.dstack((PnL_36, PnL_36_next))
+        
+np.shape(PnL_36)        
+```
+
+```{python}
+#print(list(PnL_key_items_rows.values()))
+#print(PnL_next)
+print(PnL_T_df[PnL_T_df["PartyId"] == 507])
+```
+
+```{python}
+print(months)
+#np.shape(PnL_36)
+#np.shape(PnL_36_cols)
+#print(PnL_T_df[100:110])
+#print(PnL_36)
+#print(companies_s)
+#print(PnL)
+#print(list(company)*5)
+```
+
+```{python}
+BS_key_items_st = set(BS_key_items)
+BS_key_items_rows= {e:i for i, e in enumerate(BS_items) if e in BS_key_items_st}
+    
+print(list(BS_key_items_rows.values()))
+print(list(PnL_key_items_rows.values()))
+```
+
+```{python}
+c = cursor.execute("""
+SELECT *
+FROM Invoices
+order by PartyId, RaisedDate
+
+""")
+
+#cols = [LineItems[2] for LineItems in c.fetchall()]
+cols = [desc[0] for desc in c.description]
+
+Invoice_df = pd.DataFrame(np.asarray(c.fetchall()), columns=cols)
+Invoice_df.head()
+
+print(cols)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT *
+FROM InvoiceLineItems
+
+""")
+cols = [desc[0] for desc in c.description]
+df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+df.head()
+```
+
+```{python}
+c = cursor.execute("""
+SELECT *
+FROM InvoiceAllocations
+
+""")
+cols = [desc[0] for desc in c.description]
+df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+df.head()
+```
+
+```{python}
+
+c = cursor.execute("""
+SELECT *
+FROM Bills
+order by PartyId, RaisedDate
+""")
+
+#cols = [LineItems[2] for LineItems in c.fetchall()]
+cols = [desc[0] for desc in c.description]
+
+Bills_df = pd.DataFrame(np.asarray(c.fetchall()), columns=cols)
+Bills_df.head()
+
+print(cols)
+```
+
+```{python}
+c = cursor.execute("""
+SELECT *
+FROM BillLineItems
+
+""")
+cols = [desc[0] for desc in c.description]
+df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+df.head()
+```
+
+```{python}
+c = cursor.execute("""
+SELECT *
+FROM BillAllocations
+
+""")
+#cols = [desc[0] for desc in c.description]
+#df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+#df.head()
+```
+
+```{python}
+c = cursor.execute("""
+SELECT *
+FROM ProfitAndLosses
+
+""")
+
+
+records = c.fetchall()
+np.shape(records) 
+type(records) 
+records_array = np.asarray(records)
+type(records_array) 
+
+print(records_array[:3, :])
+                       
+```
+
+```{python}
+import pandas as pd
+
+q = """
+SELECT *
+FROM ProfitAndLosses
+"""
+c = cursor.execute(q)
+cols = [desc[0] for desc in c.description]
+
+df = pd.DataFrame(np.asarray(c.fetchall()), columns=cols)
+#PnL_T_df = pd.DataFrame(c.fetchall())
+df.head()
+```
+
+```{python}
+import numpy as np
+
+np.shape(PnL_T_df)
+```
+
+```{python}
+path1 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\borse.csv'
+path2 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\thresholdsll.csv'
+path3 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\thresholdslpts.csv'
+path4 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\thresholdsul.csv'
+path5 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\thresholdsupts.csv'
+path6 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\commercial.csv'
+path7 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\ReviewTriggerLevels.csv'
+path8 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\signalnarrativewithinsert.csv'
+path9 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\HighRiskCodes.csv'
+#path10 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\BSv2.csv'
+path11 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\actions.csv'
+path12 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\NBA_scorecard.csv'
+path13 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\OpenBanking.csv'
+#path14 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\PnLv2.csv'
+#path15 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\BSv2.csv'
+#path16 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\PnLv2_T.csv'
+#path17 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\BSv2_T.csv'
+#path18 = r'C:\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\invoicev2.csv'
+
+borse_df = pd.read_csv(path1)
+thresholdsll_df = pd.read_csv(path2)
+thresholdslpts_df = pd.read_csv(path3)
+thresholdsul_df = pd.read_csv(path4)
+thresholdsupts_df = pd.read_csv(path5)
+commercial_df = pd.read_csv(path6,  parse_dates=["date of incorporation"])
+review_trigger_levels_df = pd.read_csv(path7)
+signal_narrative_df = pd.read_csv(path8)
+high_risk_codes_df = pd.read_csv(path9)
+#BS_df = pd.read_csv(path10)
+actions_df = pd.read_csv(path11)
+NBA_scorecard_df = pd.read_csv(path12)
+OpenBanking_df = pd.read_csv(path13, parse_dates=["open date"])
+#PnL_df = pd.read_csv(path14)
+#PnL_T_df = pd.read_csv(path16)
+#BS_T_df = pd.read_csv(path17)
+#invoice_df = pd.read_csv(path18)
+
+print(borse_df)
+#print(thresholdsll_df)
+#print(thresholdslpts_df)
+#print(thresholdsul_df)
+#print(thresholdsupts_df)
+#print(commercial_df)
+#print(review_trigger_levels_df)
+#print(signal_narrative_df)
+#print(high_risk_codes_df)
+#print(BS_df)
+#print(actions_df)
+#print(NBA_scorecard_df)
+#print(OpenBanking_df)
+#print(PnL_T_df)
+#print(BS_T_df)
+```
+
+```{python}
+import sqlite3
+```
+
+```{python}
+conn = sqlite3.connect('TestDB10.db') 
+c = conn.cursor()
+borse_df.to_sql('borse', conn, if_exists='replace', index = False)
+thresholdsll_df.to_sql('thresholdsll', conn, if_exists='replace', index = False)
+thresholdslpts_df.to_sql('thresholdslpts', conn, if_exists='replace', index = False)
+thresholdsul_df.to_sql('thresholdsul', conn, if_exists='replace', index = False)
+thresholdsupts_df.to_sql('thresholdsupts', conn, if_exists='replace', index = False)
+commercial_df.to_sql('commercial', conn, if_exists='replace', index = False)
+review_trigger_levels_df.to_sql('review_trigger_levels', conn, if_exists='replace', index = False)
+signal_narrative_df.to_sql('signal_narrative', conn, if_exists='replace', index = False)
+high_risk_codes_df.to_sql('high_risk_codes', conn, if_exists='replace', index = False)
+#BS_df.to_sql('BS', conn, if_exists='replace', index = False)
+actions_df.to_sql('actions', conn, if_exists='replace', index = False)
+NBA_scorecard_df.to_sql('NBA_scorecard', conn, if_exists='replace', index = False)
+OpenBanking_df.to_sql('OpenBanking', conn, if_exists='replace', index = False)
+#PnL_df.to_sql('PnL', conn, if_exists='replace', index = False)
+#BS_T_df.to_sql('BS_T', conn, if_exists='replace', index = False)
+#PnL_T_df.to_sql('PnL_T', conn, if_exists='replace', index = False)
+#invoice_df.to_sql('invoice', conn, if_exists='replace', index = False)
+```
+
+```{python}
+c = conn.cursor()
+q = """
+SELECT *
+FROM thresholdslpts
+"""
+c.execute(q)
+cols = [desc[0] for desc in c.description]
+df = pd.DataFrame(c.fetchall(), columns=cols)
+df.head()
+
+c = conn.cursor()
+q = """
+SELECT *
+FROM borse
+"""
+c.execute(q)
+cols = [desc[0] for desc in c.description]
+borse_df = pd.DataFrame(c.fetchall(), columns=cols)
+borse_df.head()
+
+c = conn.cursor()
+q = """
+SELECT *
+FROM commercial
+"""
+c.execute(q)
+cols = [desc[0] for desc in c.description]
+commercial_df = pd.DataFrame(c.fetchall(), columns=cols)
+commercial_df.head()
+
+#print(commercial_df)
+
+c = conn.cursor()
+q = """
+SELECT *
+FROM high_risk_codes
+"""
+c.execute(q)
+cols = [desc[0] for desc in c.description]
+high_risk_codes_df = pd.DataFrame(c.fetchall(), columns=cols)
+high_risk_codes_df.head()
+```
+
+```{python}
+
+
+
+PnL_key_line_items = [
+"Sales",
+"Total Cost of Sales",
+"Gross Margin",
+"Total Sales & Marketing Expenses",
+"Rent",
+"Payroll Expense",
+"Total General & Administrative Expenses",
+"Loan Repayment",
+"Inventory",
+"Depreciation",
+"Total Operating Expenses",
+"Profit Before Interest and Taxes",
+"Interest Expense Short-term",
+"Interest Expense Long-term",
+"Taxes Incurred",
+"Extraordinary Items",
+"Net Profit",
+]
+
+
+BS_key_line_items = [
+"Accounts Receivable",
+"Inventory",
+"Other Short-term Assets",
+"Total Short-term Assets",    
+"Long-term Assets",
+"Total Assets",
+"Cash",
+"Accounts Payable",
+"Short-term Notes",
+"Other Short-term Liabilities",
+"Subtotal Short-term Liabilities",    
+"Long-term Liabilities",
+"Total Liabilities",
+"Paid in Capital",
+"Dividends paid",
+"Retained Earnings",    
+"Earnings",    
+"Total Capital",   
+"Net Worth"    
+]
+
+
+
+PnL_st = set(PnL_key_line_items)
+#PnL_line_indices =  {e:i for i, e in enumerate(PnL_line_items) if e in PnL_st}
+PnL_line_indices =  {e:i for i, e in enumerate(PnL_key_items) if e in PnL_st}
+
+BS_st = set(BS_key_line_items)
+#BS_line_indices = {e:i for i, e in enumerate(BS_line_items) if e in BS_st}
+BS_line_indices = {e:i for i, e in enumerate(BS_key_items) if e in BS_st}
+
+print(PnL_line_indices)
+print(BS_line_indices)
+
+```
+
+```{python}
+PnL=PnL_36
+BS=BS_36
+```
+
+```{python}
+
+```
+
+```{python}
+np.shape(PnL)
+print(list(PnL_line_indices.values()))
+```
+
+```{python}
+PnL_key_lines = PnL[list(PnL_line_indices.values()), :, :]
+BS_key_lines = BS[list(BS_line_indices.values()), :, :]
+#PnL_key_lines.shape
+#print(BS_key_lines)
+#print(PnL_key_lines)
+```
+
+```{python}
+SalesValue = PnL[PnL_line_indices["Sales"], :, :]
+DirectCostofSalesValue = PnL[PnL_line_indices["Total Cost of Sales"], :, :]
+TotalCurrentAssetsValue = BS[BS_line_indices["Total Short-term Assets"], :, :]
+TotalCurrentLiabilitiesValue = BS[BS_line_indices["Subtotal Short-term Liabilities"], :, :]
+TotalEquityValue = BS[BS_line_indices["Total Capital"], :, :]
+LongTermLiabilitiesValue =  BS[BS_line_indices["Long-term Liabilities"], :, :]
+OperatingExpensesValue =  PnL[PnL_line_indices["Total Operating Expenses"], :, :]
+TotalNetAssetsValue =  BS[BS_line_indices["Total Assets"], :, :] - BS[BS_line_indices["Total Liabilities"], :, :]
+TotalFixedAssetValue =  BS[BS_line_indices["Long-term Assets"], :, :]
+TotalIncomeValue = PnL[PnL_line_indices["Sales"], :, :]
+OtherIncomeValue =  np.zeros(np.shape(TotalIncomeValue))
+OwnersFundsValue =  BS[BS_line_indices["Total Capital"], :, :]
+#SalesValue = PnL_key_lines[PnL_key_line_items.index("Sales"), :, :]
+DepreciationValue =  PnL[PnL_line_indices["Depreciation"], :, :]
+OperatingCostsValue =  PnL[PnL_line_indices["Total Operating Expenses"], :, :]
+PBITValue = PnL[PnL_line_indices["Profit Before Interest and Taxes"], :, :]
+InterestValue = PnL[PnL_line_indices["Interest Expense Short-term"], :, :] + PnL[PnL_line_indices["Interest Expense Long-term"], :, :]
+TaxValue = PnL[PnL_line_indices["Taxes Incurred"], :, :]
+PATValue = PnL[PnL_line_indices["Net Profit"], :, :]
+PaidInCapitalValue = BS[BS_line_indices["Paid in Capital"], :, :]
+DividendValue = BS[BS_line_indices["Dividends paid"], :, :]
+RetainedEarningsValue = BS[BS_line_indices["Retained Earnings"], :, :]
+EarningsValue = BS[BS_line_indices["Earnings"], :, :]
+OrdinaryShareNumber =  np.zeros(np.shape(TotalIncomeValue)) 
+OrdinarySharePriceValue =  np.zeros(np.shape(TotalIncomeValue)) 
+InventoryValue = BS[BS_line_indices["Inventory"], :, :]
+DebtValue = BS[BS_line_indices["Short-term Notes"], :, :]
+CashValue = BS[BS_line_indices["Cash"], :, :]
+NetWorthValue = BS[BS_line_indices["Net Worth"], :, :]
+RentValue = PnL[PnL_line_indices["Rent"], :, :]
+PayRollValue = PnL[PnL_line_indices["Payroll Expense"], :, :]
+
+
+
+#print(Sales)
+```
+
+```{python}
+print(RentValue)
+```
