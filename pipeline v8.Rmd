@@ -3398,7 +3398,7 @@ for batch in range(len(batches_dump)) :
     #url = 'https://httpbin.org/post'
     url = 'https://api.openrep.cloud/development/insightplatform/v1/webhooks/analyticsbroker/batch'
     headers = {
-    'Authorization': 'Bearer 46a8150d-9385-49d0-8240-096cc6869382', 
+    'Authorization': 'Bearer xxxxx', 
     'Content-Type' : 'application/json', 
     'User-Agent': 'PostmanRuntime/7.28.0'
     }
