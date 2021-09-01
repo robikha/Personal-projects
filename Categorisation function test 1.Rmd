@@ -1,0 +1,341 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.2'
+      jupytext_version: 1.11.2
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+```{python}
+#this section connects to the sql database which holds the accounting test data
+
+import pyodbc 
+import pandas as pd
+import numpy as np
+import os
+
+
+# Some other example server values are
+# server = 'localhost\sqlexpress' # for a named instance
+# server = 'myserver,port' # to specify an alternate port
+server = 'obr-mvp-eun-s-sql.database.windows.net' 
+database = 'OBRPlatform' 
+#username = os.environ.get('OpenRep_DB_USERNAME') 
+#password = os.environ.get('OpenRep_DB_PASSWORD')  
+username = "C0a5827cvVC2c15"
+password = "291C02k891e1a_d"
+cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+ str(username)+';PWD='+ str(password))
+cursor = cnxn.cursor()
+```
+
+```{python}
+
+def categorisation (party1) :
+
+   c = cursor.execute("""
+
+   Declare @listOfIds Char(100) =(?)
+
+   SELECT  PartyId, 
+        Id, 
+        ContainerType, 
+        QualifiedCategory,  
+        QualifiedName, 
+        Description,
+        CASE  
+        WHEN ContainerType = 'Income' 
+            THEN 'Revenue' 
+        WHEN ContainerType = 'Expense' AND (QualifiedCategory = 'Expense.DirectCosts' OR QualifiedCategory like '%Expense.Cost of Goods Sold%' OR QualifiedCategory like '%Cogs%')
+            THEN 'CostOfSales'
+        WHEN ContainerType = 'Expense' AND (QualifiedCategory = 'Expense.Overhead' OR QualifiedCategory like '%Expense.Expense%') 
+            THEN 'OperationalCosts'    
+        WHEN ContainerType = 'Expense' AND (QualifiedCategory like '%Expense.Other Expense%') 
+            THEN 'NonOperationalCosts'    
+        WHEN ContainerType = 'Assets' AND QualifiedCategory like '%Asset.Fixed%' AND QualifiedName <> 'Asset.Fixed.Intangibles' 
+            THEN 'FixedTangibleAssets'
+                WHEN ContainerType = 'Assets' AND QualifiedCategory like '%Asset.Fixed%' AND QualifiedName ='Asset.Fixed.Intangibles' 
+            THEN 'FixedIntangibleAssets'
+        WHEN ContainerType = 'Assets' AND QualifiedCategory NOT like '%Asset.Fixed%' 
+            THEN 'CurrentAssets'
+        WHEN ContainerType = 'Liabilities' AND (QualifiedCategory like '%NonCurrent%' OR QualifiedCategory like '%Long Term%')
+            THEN 'LongTermLiabilities'
+        WHEN ContainerType = 'Liabilities' AND NOT (QualifiedCategory like '%NonCurrent%' OR QualifiedCategory like '%Long Term%') 
+            THEN 'CurrentLiabilities'
+        WHEN ContainerType = 'Equity' 
+            THEN 'CapitalAndReserve'
+        ELSE 'Unallocated' 
+        END as CommonCategory,
+        BalanceCurrent
+   FROM Accounts 
+   WHERE PartyId  in (
+       SELECT *
+       FROM STRING_SPLIT(@listOfIds, ',')
+       )
+
+
+   """, (party1))
+
+        
+   cols = [desc[0] for desc in c.description]
+   Acc_cat_df = pd.DataFrame(np.asarray(c.fetchall()), columns = cols)
+
+   return (Acc_cat_df)
+
+p = '1668, 1751'
+
+#Acc_detail_df = categorisation('1668,1751')
+Acc_detail_df = categorisation(p)
+
+
+
+pd.set_option('display.max_rows', None)
+#print(Acc_detail_df[Acc_detail_df['CommonCategory'] == 'Unallocated'], end='')
+#print(Acc_detail_df)
+
+```
+
+```{python}
+
+
+includeKeyWords = ['Market', '& Sales', "Advertsing"]
+Market_str = '|'.join(includeKeyWords)
+Market_mask = Acc_detail_df.stack().str.contains(Market_str).any(level=0)
+Acc_detail_df.loc[Market_mask,'CommonCategory'] = 'AdvertisingAndMarketing'
+
+OthOps_mask= Acc_detail_df['CommonCategory'] == 'OperationalCosts' 
+Acc_detail_df.loc[OthOps_mask,'CommonCategory'] = 'OtherOperationalCosts'
+
+
+#print(Acc_detail_df.groupby('CommonCategory').agg({'CommonCategory':'count','BalanceCurrent':'sum'}))
+
+includeKeyWords = ['Depr', 'depr']
+Deprec_str = '|'.join(includeKeyWords)
+Expense_str = 'Expense'
+Deprec_mask = Acc_detail_df.stack().str.contains(Deprec_str).any(level=0) 
+Expense_mask = Acc_detail_df.stack().str.contains(Expense_str).any(level=0) 
+Deprec_Expense_mask = Deprec_mask & Expense_mask
+#Deprec_df = Acc_detail_df[Deprec_mask]
+Acc_detail_df.loc[Deprec_Expense_mask,'CommonCategory'] = 'DepreciationExpense'
+#print(Acc_detail_df)
+#print(np.shape(Deprec_mask))
+#print(Acc_detail_df.groupby('Common_Category').agg({'Common_Category':'count','BalanceCurrent':'sum'}))
+
+#print(Deprec_df)
+
+includeKeyWords = ['Finance charge', 'Interest', "Bank Fees"]
+Fin_charge_str = '|'.join(includeKeyWords)
+Fin_charge_mask = Acc_detail_df.stack().str.contains(Fin_charge_str).any(level=0)
+#Fin_charge_df = Acc_detail_df[Fin_charge_mask]
+Acc_detail_df.loc[Fin_charge_mask,'CommonCategory'] = 'InterestExpense'
+
+#print(Fin_charge_df)
+
+includeKeyWords = ['Taxation', 'Tax', "VAT", "PAYE"]
+Tax_str = '|'.join(includeKeyWords)
+Expense_str = 'Expense'
+Tax_mask = Acc_detail_df.stack().str.contains(Tax_str).any(level=0)
+Expense_mask = Acc_detail_df.stack().str.contains(Expense_str).any(level=0) 
+Tax_Expense_mask = Tax_mask & Expense_mask
+Acc_detail_df.loc[Tax_Expense_mask,'CommonCategory'] = 'TaxExpense'
+#Tax_df = Acc_detail_df[Tax_mask]
+#print(Tax_df)
+
+includeKeyWords = ['accumulated', 'Accumulated']
+Acc_deprec_str = '|'.join(includeKeyWords)
+Assets_str = 'Assets'
+Acc_deprec_mask = Acc_detail_df.stack().str.contains(Deprec_str).any(level=0)
+Assets_mask = Acc_detail_df.stack().str.contains(Assets_str).any(level=0) 
+Acc_Depr_Assets_mask = Acc_deprec_mask & Assets_mask
+Acc_detail_df.loc[Acc_Depr_Assets_mask,'CommonCategory'] = 'AccumulatedDepreciation'
+
+
+#print(Acc_detail_df.groupby(['PartyId','CommonCategory']).agg({'CommonCategory':'count','BalanceCurrent':'sum'}))
+#PnL_1668_1751_detail_df.groupby('Common_Category').agg({'Common_Category':'count','BalanceCurrent':'sum'})
+
+
+#pd.DataFrame(Acc_detail_df).to_csv("\\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\AccountingTest\Categorisation.csv", header=None, index=None)
+#pd.DataFrame(Acc_detail_df).to_csv("\\Users\kenhr\Categorisation.csv", header=CategoryHeader, index=None)
+```
+
+```{python}
+
+#pd.set_option('display.max_rows', None)
+
+
+#print(Acc_detail_df[Acc_detail_df['PartyId'] == 1751].groupby(['PartyId','CommonCategory']).agg({'CommonCategory':'count','BalanceCurrent':'sum'}))
+#print(Acc_detail_df.groupby(['PartyId','CommonCategory']).agg({'CommonCategory':'count','BalanceCurrent':'sum'}))
+```
+
+```{python}
+CategoryHeader = [
+"PartyId",    
+"Id",
+"CommonCategory"]
+
+mapping_df = Acc_detail_df[['PartyId', 'Id', "CommonCategory"]]
+
+mapping_array = np.array(mapping_df)
+
+#print(mapping_array)
+#pd.DataFrame(mapping_df).to_csv("\\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\AccountingTest\Categorisation.csv", header=CategoryHeader, index=None)
+pd.DataFrame(mapping_df).to_csv("\\Users\kenhr\Categorisation.csv", header=CategoryHeader, index=None)
+
+#pd.DataFrame(Acc_detail_df).to_csv("\\Users\kenhr\OneDrive\Documents\Ken\OBR\Analytical kernel\AccountingTest\Categorisation.csv", header=None, index=None)
+
+
+```
+
+```{python}
+CategorisationBatchRowFmtDict = {
+"Id" : "int",
+"PartyId" : "int",
+"CommonCategory" : "string" 
+}
+```
+
+```{python}
+#controlling output format
+
+
+import json
+import requests
+import math
+from itertools import chain
+from typing import List
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+
+
+
+
+
+def batch(input_array, batch_size):
+
+  nrows, ncols =np.shape(input_array)
+  number_batches = nrows // batch_size + ( nrows%batch_size > 0 )
+
+  if nrows%batch_size == 0 :
+    last_batch = np.empty( (batch_size, ncols) )
+  else :  
+    last_batch = np.empty( (nrows%batch_size, ncols) )
+  batches = np.reshape(input_array[ : (number_batches - 1) * batch_size , :], ( number_batches -1, batch_size, ncols )) 
+  last_batch = input_array[ (number_batches - 1) * batch_size : nrows , :]
+  return  (batches, last_batch)
+
+def array_to_json(batches, last_batch, header, BatchRowFmtDict, output_key):
+
+   num_batches, batch_size, ncols =np.shape(batches)
+
+   #b = dict(zip(header, Alloutput_reshape_array[1][:]))
+        
+    
+ 
+   items = list(BatchRowFmtDict.keys())
+    
+   AllBatch_dump =[]
+   for batch in range(num_batches)  :
+      BatchList= []    
+      for i in range(batch_size):
+        BatchRowList=[]    
+        for j, field in enumerate(batches[batch, i,:].ravel().tolist()) :
+            if BatchRowFmtDict[items[j]] == "float" : 
+               BatchRowList.append(field)
+            elif  BatchRowFmtDict[items[j]] == "int" : 
+               BatchRowList.append(int(math.floor(field)))
+            elif BatchRowFmtDict[items[j]] == "monthenddt" : 
+               BatchRowList.append(str((datetime.strptime(field, r"%Y-%b") + relativedelta(day=31)).strftime("%Y-%m-%d %H:%M:%SZ"))[:20])
+            elif BatchRowFmtDict[items[j]] == "todaydt" : 
+               BatchRowList.append(str(field.strftime("%Y-%m-%d %H:%M:%SZ")[:20])) 
+            else : BatchRowList.append(field)
+        BatchRowDict = dict(zip(header, BatchRowList))
+        BatchList.append(BatchRowDict.copy())
+      Batch_dump = {}
+      #Batch_dump = { output_key+str('%')+str(batch) : BatchList }
+      Batch_dump = { output_key : BatchList }
+      AllBatch_dump.append(Batch_dump)       
+   
+   batch_size, ncols =np.shape(last_batch)
+      
+   BatchList=[]   
+   for i in range(batch_size):
+      BatchRowList=[]   
+      for j, field in enumerate(last_batch[i,:].ravel().tolist()) :
+            if BatchRowFmtDict[items[j]] == "float" : 
+               BatchRowList.append(field)
+            elif  BatchRowFmtDict[items[j]] == "int" : 
+               BatchRowList.append(int(math.floor(field)))
+            elif BatchRowFmtDict[items[j]] == "monthenddt" : 
+               BatchRowList.append(str((datetime.strptime(field, r"%Y-%b") + relativedelta(day=31)).strftime("%Y-%m-%d %H:%M:%SZ"))[:20])
+            elif BatchRowFmtDict[items[j]] == "todaydt" : 
+               BatchRowList.append(str(field.strftime("%Y-%m-%d %H:%M:%SZ"))[:20]) 
+            else : BatchRowList.append(field)
+   BatchRowDict = dict(zip(header, BatchRowList))
+   BatchList.append(BatchRowDict.copy())
+   Batch_dump = {}
+   #Batch_dump = { output_key+str('%')+str(batch) : BatchList }
+   Batch_dump = { output_key : BatchList }
+   AllBatch_dump.append(Batch_dump)       
+        
+   #for x, block in enumerate(BatchRowList) :
+   #  print(type(BatchRowList[x]))
+
+   return AllBatch_dump
+    
+#utc = datetime.strptime('2011-01-21 02:37:21', '%Y-%m-%d %H:%M:%S')
+#datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%SZ")
+
+```
+
+```{python}
+
+#Categorisaton_batches, Categorisaton_last_batch = cat_batch(mapping_array, 500 )
+#Categorisaton_dump = cat_to_json(Categorisaton_batches, Categorisaton_last_batch, CategoryHeader, CategorisationBatchRowFmtDict, "Categorisation")    
+
+Categorisaton_batches, Categorisaton_last_batch = batch(mapping_array, 500 )
+Categorisaton_dump = array_to_json(Categorisaton_batches, Categorisaton_last_batch, CategoryHeader, CategorisationBatchRowFmtDict, "Categorisation")    
+
+
+```
+
+```{python}
+#print(Categorisaton_dump)
+#print(np.shape(Categorisaton_dump))
+```
+
+```{python}
+from contextlib import redirect_stdout
+import itertools
+import time
+
+
+batches_dump = list(itertools.chain(Categorisaton_dump))
+filenames = ["JSONtest" + str(i) + ".txt" for i in range(len(batches_dump))]
+
+for batch in range(len(batches_dump)) :
+#for batch in range(4) :
+    payload = batches_dump[batch]
+    url = 'https://api.openrep.cloud/development/insightplatform/brokers/v1/analytics/invoke'
+    headers = {
+    'Authorization': 'Bearer 46a8150d-9385-49d0-8240-096cc6869382', 
+    'Content-Type' : 'application/json', 
+    'User-Agent': 'PostmanRuntime/7.28.0'
+    }
+    
+    requests.post(url, data=json.dumps(payload), headers=headers)
+     
+    with open(str(filenames[batch]), 'w') as f:
+        with redirect_stdout(f):
+            print(json.dumps(payload))
+    #time.sleep(0.1)        
+
+#print(requests.get(url, data= , headers=headers))    
+#assert batches_dump[0] != batches_dump[1], "dump are same"
+    
+```
